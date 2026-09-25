@@ -8,8 +8,8 @@ speaker never sleeps. AudioNap watches for silence (MediaRemote + "Playing audio
 power assertion) and user inactivity, then drops the Bluetooth connection — and
 the speaker's own firmware timer does the rest.
 
-> **Status: work in progress.** The daemon is being ported from a proven
-> prototype; first release is on the way.
+> **Status: work in progress.** The app skeleton is in place; the daemon will be
+> ported from a proven prototype. First release is on the way.
 
 ## Components
 
@@ -30,7 +30,7 @@ speaker's own 15-minute timer → powers off
 
 ## Build
 
-Requirements: macOS 14+, Xcode 16+.
+Requirements: macOS 14+, Xcode 27+.
 
 ```bash
 git clone https://github.com/IvanTrusenev/audionap.git

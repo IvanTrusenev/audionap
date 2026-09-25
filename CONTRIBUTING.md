@@ -9,7 +9,6 @@ first release.
 |-----------|----------|
 | `App/` | SwiftUI menu bar app (target `AudioNap`) |
 | `Daemon/` | Headless daemon (target `audionapd`) |
-| `Shared/` | Code compiled into both targets and the tests |
 | `Tests/` | Unit tests (target `AudioNapTests`) |
 
 ## Build & test
