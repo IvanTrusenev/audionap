@@ -1,0 +1,14 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+
+# Build products
+build/
+dist/
+
+# macOS
+.DS_Store
+
+# Working directory
+.workbench/
