@@ -30,7 +30,7 @@ speaker's own 15-minute timer → powers off
 
 ## Build
 
-Requirements: macOS 13+, Xcode 16+.
+Requirements: macOS 14+, Xcode 16+.
 
 ```bash
 git clone https://github.com/IvanTrusenev/audionap.git
