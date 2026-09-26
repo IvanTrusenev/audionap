@@ -23,6 +23,10 @@ xcodebuild -project AudioNap.xcodeproj -scheme audionapd build
 - Commits in English, imperative mood, short subject
 - One logical change per commit
 
+## Code style
+
+Conventions live in [STYLE.md](STYLE.md).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
