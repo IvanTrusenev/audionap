@@ -10,7 +10,7 @@ struct PowerAssertionParserTests {
                 in: """
                     pid 123(yandex.music): [0x0000001f00012345] 00:01:23 NoIdleSleepAssertion named: "Playing audio"
                     """
-            ))
+            ) == true)
     }
 
     @Test func unrelatedAssertionsReturnFalse() {

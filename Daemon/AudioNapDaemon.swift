@@ -20,6 +20,14 @@ struct AudioNapDaemon: ParsableCommand {
 
     func run() throws {
         if testOnce {
+            let mac = ProcessInfo.processInfo.environment["AUDIONAP_SPEAKER_MAC"] ?? "aa-bb-cc-dd-ee-ff"
+            let connected = BluetoothController().isConnected(to: mac)
+            print("connected: \(connected)")
+
+            guard connected else {
+                return
+            }
+
             let assertion = PowerAssertionSource().isPlayingAudio()
             let idle = IdleMonitor().idleSeconds()
             print("assertion: \(assertion)")
