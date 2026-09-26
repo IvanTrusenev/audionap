@@ -20,9 +20,13 @@ struct AudioNapDaemon: ParsableCommand {
 
     func run() throws {
         if testOnce {
-            print("detection: not implemented yet (M2.4)")
-        } else {
-            print("daemon loop: not implemented yet (M2.5)")
+            let playing = PowerAssertionSource().isPlayingAudio()
+            let idle = IdleMonitor().idleSeconds()
+            print("playing: \(playing)")
+            print("idle: \(Int(idle))s")
+            return
         }
+        
+        print("daemon loop: not implemented yet (M2.5)")
     }
 }
