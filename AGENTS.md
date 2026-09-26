@@ -12,6 +12,9 @@ user inactivity, letting the speaker's own power-off timer finish the job.
 - Increment format: plan the piece → explain the concepts before code → code →
   walk through the result file by file → tests → owner commits.
 - Keep project docs up to date after every significant change.
+- The committed repo stays product-only. Experiments, research, and notes
+  about unrelated tools live in `.workbench/` (personal notes, not
+  committed); project docs carry no references to them.
 - Code, comments, log messages, docs, and commit messages are in English;
   commits are imperative-mood, one logical change each (see CONTRIBUTING.md).
 
@@ -31,15 +34,16 @@ user inactivity, letting the speaker's own power-off timer finish the job.
 - launchd label / bundle IDs: `online.threealab.audionap(.daemon)`; config at
   `~/Library/Application Support/AudioNap/config.plist` (atomic writes; invalid
   values → defaults + log, never crash).
-- Legacy agent `com.ivantrusenev.bt-speaker-idle` stays on the Mac mini until
-  migration (after M3); `--test-once` never disconnects.
+- `--test-once` runs one detection pass and never disconnects.
 - Package tests run via `swift test` in `Shared/` (Xcode 27 does not expose SPM
   test targets in test plans without a workspace; verified 2026-09-26).
 
 ## Progress
 
 M0 ✓ research; M1 ✓ skeleton (App/Daemon/Tests folders, shared schemes, public
-repo); M2.1 ✓ Shared package (AppConfig, DaemonDecision, LogLevel; 14 tests).
-Next: M2.2 (Paths, LaunchAgentSpec) → M2.3 (link into audionapd, CLI) →
-M2.4 (monitors) → M2.5 (ConfigWatcher, run loop) → M2.6 (live check on the
-Mac mini). Reference implementation: bt-speaker-idle.
+repo); M2 ✓ daemon (Shared package: AppConfig, DaemonDecision, monitors,
+ConfigWatcher, run loop; live run 2026-09-26 showed the full
+silence+idle→disconnect cycle); M3 ✓ menu bar app (status, Start/Stop,
+hot config sliders, log tail). Next: M4 (device picker,
+ignoreUserActivity toggle, reconnect button, e2e check with the real
+speaker).
