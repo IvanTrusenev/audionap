@@ -1,4 +1,5 @@
 import Testing
+
 @testable import Shared
 
 struct DaemonDecisionTests {
@@ -8,7 +9,7 @@ struct DaemonDecisionTests {
     @Test func disconnectsAfterQuietAndIdle() {
         let decision = DaemonDecision.evaluate(
             nowPlaying: false,
-            quietSeconds: 3 * 60, // exactly the threshold for the default 3-minute timeout
+            quietSeconds: 3 * 60,  // exactly the threshold for the default 3-minute timeout
             idleSeconds: 3 * 60,
             config: AppConfig()
         )
@@ -19,7 +20,7 @@ struct DaemonDecisionTests {
     @Test func neverDisconnectsWhilePlaying() {
         let decision = DaemonDecision.evaluate(
             nowPlaying: true,
-            quietSeconds: 60 * 60, // an hour of silence doesn't matter
+            quietSeconds: 60 * 60,  // an hour of silence doesn't matter
             idleSeconds: 60 * 60,
             config: AppConfig()
         )
@@ -29,7 +30,7 @@ struct DaemonDecisionTests {
     @Test func waitsForSilenceWindow() {
         let decision = DaemonDecision.evaluate(
             nowPlaying: false,
-            quietSeconds: 2 * 60 + 59, // one second short of the threshold
+            quietSeconds: 2 * 60 + 59,  // one second short of the threshold
             idleSeconds: 60 * 60,
             config: AppConfig()
         )
@@ -40,7 +41,7 @@ struct DaemonDecisionTests {
         let decision = DaemonDecision.evaluate(
             nowPlaying: false,
             quietSeconds: 60 * 60,
-            idleSeconds: 3 * 60 - 1, // one second short of the idle window
+            idleSeconds: 3 * 60 - 1,  // one second short of the idle window
             config: AppConfig()
         )
         #expect(decision == .stayConnected(reason: .idleTooShort))

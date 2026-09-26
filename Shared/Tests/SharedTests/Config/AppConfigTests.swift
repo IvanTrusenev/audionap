@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import Shared
 
 struct AppConfigTests {
@@ -29,14 +30,14 @@ struct AppConfigTests {
 
     @Test func outOfRangePollSecondsFallsBackToDefault() {
         var config = AppConfig()
-        config.pollSeconds = 5 // below the minimum of 10
+        config.pollSeconds = 5  // below the minimum of 10
         let result = config.normalized()
         #expect(result.config.pollSeconds == AppConfig.defaultPollSeconds)
     }
 
     @Test func outOfRangeInputWindowFallsBackToDefault() {
         var config = AppConfig()
-        config.inputWindowMinutes = 0 // below the minimum of 1
+        config.inputWindowMinutes = 0  // below the minimum of 1
         let result = config.normalized()
         #expect(result.config.inputWindowMinutes == AppConfig.defaultInputWindowMinutes)
     }
@@ -65,7 +66,7 @@ struct AppConfigTests {
         let config = try! PropertyListDecoder().decode(AppConfig.self, from: data)
         #expect(config.speakerMAC == "aa-bb-cc-dd-ee-ff")
         #expect(config.silenceTimeoutMinutes == 7)
-        #expect(config.inputWindowMinutes == AppConfig.defaultInputWindowMinutes) // default
+        #expect(config.inputWindowMinutes == AppConfig.defaultInputWindowMinutes)  // default
     }
 
     @Test func brokenPlistFallsBackToDefaults() {

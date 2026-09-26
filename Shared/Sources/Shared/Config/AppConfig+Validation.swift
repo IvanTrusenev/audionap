@@ -8,11 +8,14 @@ extension AppConfig {
         var warnings: [String] = []
 
         if !Self.silenceTimeoutRange.contains(copy.silenceTimeoutMinutes) {
-            warnings.append("silenceTimeoutMinutes \(copy.silenceTimeoutMinutes) is outside \(Self.silenceTimeoutRange) — using default")
+            warnings.append(
+                "silenceTimeoutMinutes \(copy.silenceTimeoutMinutes) is outside \(Self.silenceTimeoutRange) — using default"
+            )
             copy.silenceTimeoutMinutes = Self.defaultSilenceTimeoutMinutes
         }
         if !Self.inputWindowRange.contains(copy.inputWindowMinutes) {
-            warnings.append("inputWindowMinutes \(copy.inputWindowMinutes) is outside \(Self.inputWindowRange) — using default")
+            warnings.append(
+                "inputWindowMinutes \(copy.inputWindowMinutes) is outside \(Self.inputWindowRange) — using default")
             copy.inputWindowMinutes = Self.defaultInputWindowMinutes
         }
         if !Self.pollSecondsRange.contains(copy.pollSeconds) {

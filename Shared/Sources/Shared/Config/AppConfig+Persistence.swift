@@ -14,7 +14,8 @@ extension AppConfig {
             return normalized.config
         } catch {
             // Unreadable/corrupted plist — fall back to defaults, never crash.
-            logger.error("failed to read config at \(url.path, privacy: .public): \(error, privacy: .public) — using defaults")
+            logger.error(
+                "failed to read config at \(url.path, privacy: .public): \(error, privacy: .public) — using defaults")
             return AppConfig()
         }
     }

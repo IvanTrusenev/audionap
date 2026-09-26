@@ -60,8 +60,10 @@ public struct AppConfig: Codable, Equatable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         speakerMAC = try container.decodeIfPresent(String.self, forKey: .speakerMAC)
-        silenceTimeoutMinutes = try container.decodeIfPresent(Int.self, forKey: .silenceTimeoutMinutes) ?? Self.defaultSilenceTimeoutMinutes
-        inputWindowMinutes = try container.decodeIfPresent(Int.self, forKey: .inputWindowMinutes) ?? Self.defaultInputWindowMinutes
+        silenceTimeoutMinutes =
+            try container.decodeIfPresent(Int.self, forKey: .silenceTimeoutMinutes) ?? Self.defaultSilenceTimeoutMinutes
+        inputWindowMinutes =
+            try container.decodeIfPresent(Int.self, forKey: .inputWindowMinutes) ?? Self.defaultInputWindowMinutes
         ignoreUserActivity = try container.decodeIfPresent(Bool.self, forKey: .ignoreUserActivity) ?? false
         pollSeconds = try container.decodeIfPresent(Int.self, forKey: .pollSeconds) ?? Self.defaultPollSeconds
         blueutilPath = try container.decodeIfPresent(String.self, forKey: .blueutilPath)
