@@ -1,17 +1,82 @@
+import AppKit
 import SwiftUI
-import Playgrounds
 
+/// The menu bar window: daemon status and Start/Stop controls.
+///
+/// MVP scope (M3): a status row, controls, and a Quit button —
+/// device picker, settings, and the log tail arrive in M4.
 struct ContentView: View {
+    /// Owns the view model for the app's lifetime. `@State` creates it once
+    /// and keeps it across redraws; `DaemonController` is `@Observable`, so
+    /// SwiftUI re-renders this view when a property it read in `body` changes.
+    @State private var controller = DaemonController()
+
+    /// Text of the last Start/Stop failure, shown in an alert.
+    @State private var errorMessage = ""
+    /// Whether the alert is visible.
+    @State private var showingError = false
+
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        VStack(alignment: .leading, spacing: 12) {
+            statusRow
+            Divider()
+            controlsRow
+            Divider()
+            quitRow
+        }
+        .padding()
+        .frame(width: 260)
+        .onAppear { controller.refreshStatus() }
+        .alert("Daemon control error", isPresented: $showingError) {
+            Button("OK") {}
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    /// Colored dot + state text + manual refresh.
+    private var statusRow: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(controller.isRunning ? Color.green : Color.red)
+                .frame(width: 8, height: 8)
+            Text(controller.isRunning ? "Daemon running" : "Daemon stopped")
+            Spacer()
+            Button("Refresh") { controller.refreshStatus() }
+        }
+    }
+
+    /// Start/Stop. Each button is disabled in the state where it would be
+    /// pointless: starting a running daemon, stopping a stopped one.
+    private var controlsRow: some View {
+        HStack {
+            Button("Start") { perform { try controller.start() } }
+                .disabled(controller.isRunning)
+            Button("Stop") { perform { try controller.stop() } }
+                .disabled(!controller.isRunning)
+        }
+    }
+
+    /// A window-style MenuBarExtra has no application menu, so the window
+    /// needs its own Quit button.
+    private var quitRow: some View {
+        HStack {
+            Spacer()
+            Button("Quit") { NSApplication.shared.terminate(nil) }
+        }
+    }
+
+    /// Runs a throwing control action; failures surface in the alert.
+    private func perform(_ action: () throws -> Void) {
+        do {
+            try action()
+        } catch {
+            errorMessage = error.localizedDescription
+            showingError = true
+        }
     }
 }
 
 #Preview {
     ContentView()
-}
-
-#Playground {
-    _ = 1 + 2
 }
