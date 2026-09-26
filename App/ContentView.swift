@@ -17,6 +17,8 @@ struct ContentView: View {
     @State private var showingError = false
     /// Config: reads config.plist once, saves every slider change.
     @State private var store = ConfigStore()
+    /// Tail of daemon.log, refreshed on appear and by the Refresh button.
+    @State private var logReader = LogReader()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -26,11 +28,16 @@ struct ContentView: View {
             Divider()
             settingsSection
             Divider()
+            logSection
+            Divider()
             quitRow
         }
         .padding()
-        .frame(width: 260)
-        .onAppear { controller.refreshStatus() }
+        .frame(width: 340)
+        .onAppear {
+            controller.refreshStatus()
+            logReader.refresh()
+        }
         .alert("Daemon control error", isPresented: $showingError) {
             Button("OK") {}
         } message: {
@@ -64,6 +71,11 @@ struct ContentView: View {
     /// Timeout sliders — changes persist to config.plist on every tick.
     private var settingsSection: some View {
         SettingsControls(store: store)
+    }
+
+    /// The daemon log tail — see what the daemon is doing without a terminal.
+    private var logSection: some View {
+        LogSection(reader: logReader)
     }
 
     /// A window-style MenuBarExtra has no application menu, so the window
