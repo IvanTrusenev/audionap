@@ -39,6 +39,10 @@ struct AudioNapDaemon: ParsableCommand {
         signal(SIGTERM) { _ in DaemonLoop.stop = true }
         signal(SIGINT) { _ in DaemonLoop.stop = true }
 
+        // launchd redirects stdout into daemon.log; a file pipe buffers
+        // blocks, so unbuffer per line or the log looks dead.
+        setvbuf(stdout, nil, _IOLBF, 0)
+
         let loop = DaemonLoop(config: AppConfig.load(from: Paths.configURL))
         let watcher = ConfigWatcher()
         watcher.start { newConfig in
