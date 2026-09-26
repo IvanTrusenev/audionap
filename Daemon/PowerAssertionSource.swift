@@ -3,7 +3,7 @@ import Shared
 
 /// Source of "is the Chromium family playing": runs `pmset -g assertions`
 /// and parses the output with the pure parser.
-public struct PowerAssertionSource {
+public struct PowerAssertionSource: PlaybackSource {
     public init() {}
 
     /// True while the "Playing audio" assertion is held.
