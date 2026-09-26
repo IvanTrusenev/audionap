@@ -63,6 +63,10 @@ when the team agrees on a new convention.
   just coverage                    # tests + coverage table (repo root)
   just coverage-html               # also open a highlighted report in the browser
   ```
+  Known quirk: llvm-cov may not list files whose `static let` values the
+  compiler inlines into the test code (e.g. `Paths`). The tests still verify
+  those values — the coverage table simply can't see them. Investigated
+  2026-09-26; not a project defect.
 
 ## Git
 
