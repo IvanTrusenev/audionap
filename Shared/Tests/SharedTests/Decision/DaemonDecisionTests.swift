@@ -27,6 +27,19 @@ struct DaemonDecisionTests {
         #expect(decision == .stayConnected(reason: .playing))
     }
 
+    @Test func neverDisconnectsWhenSpeakerOnPower() {
+        var config = AppConfig()
+        config.speakerOnBattery = false  // speaker plugged into the wall
+
+        let decision = DaemonDecision.evaluate(
+            nowPlaying: false,
+            quietSeconds: 60 * 60,  // silence and idle don't matter either
+            idleSeconds: 60 * 60,
+            config: config
+        )
+        #expect(decision == .stayConnected(reason: .speakerOnPower))
+    }
+
     @Test func waitsForSilenceWindow() {
         let decision = DaemonDecision.evaluate(
             nowPlaying: false,

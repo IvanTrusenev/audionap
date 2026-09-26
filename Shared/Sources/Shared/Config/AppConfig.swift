@@ -11,6 +11,9 @@ public struct AppConfig: Codable, Equatable, Sendable {
     public var silenceTimeoutMinutes: Int
     public var inputWindowMinutes: Int
     public var ignoreUserActivity: Bool
+    /// Requirement: disconnect only while the speaker runs on battery —
+    /// a speaker on wall power is never disconnected.
+    public var speakerOnBattery: Bool
     public var pollSeconds: Int
     /// Path to `blueutil`; nil = search PATH.
     public var blueutilPath: String?
@@ -28,6 +31,7 @@ public struct AppConfig: Codable, Equatable, Sendable {
     public static let defaultInputWindowMinutes = 3
     public static let defaultPollSeconds = 30
     public static let defaultLogLevel: LogLevel = .info
+    public static let defaultSpeakerOnBattery = true
 
     /// The same windows in seconds — the units the daemon counts in.
     /// The only place where minutes are converted to seconds.
@@ -39,6 +43,7 @@ public struct AppConfig: Codable, Equatable, Sendable {
         silenceTimeoutMinutes: Int = Self.defaultSilenceTimeoutMinutes,
         inputWindowMinutes: Int = Self.defaultInputWindowMinutes,
         ignoreUserActivity: Bool = false,
+        speakerOnBattery: Bool = Self.defaultSpeakerOnBattery,
         pollSeconds: Int = Self.defaultPollSeconds,
         blueutilPath: String? = nil,
         nowPlayingCLIPath: String? = nil,
@@ -48,6 +53,7 @@ public struct AppConfig: Codable, Equatable, Sendable {
         self.silenceTimeoutMinutes = silenceTimeoutMinutes
         self.inputWindowMinutes = inputWindowMinutes
         self.ignoreUserActivity = ignoreUserActivity
+        self.speakerOnBattery = speakerOnBattery
         self.pollSeconds = pollSeconds
         self.blueutilPath = blueutilPath
         self.nowPlayingCLIPath = nowPlayingCLIPath
@@ -65,6 +71,8 @@ public struct AppConfig: Codable, Equatable, Sendable {
         inputWindowMinutes =
             try container.decodeIfPresent(Int.self, forKey: .inputWindowMinutes) ?? Self.defaultInputWindowMinutes
         ignoreUserActivity = try container.decodeIfPresent(Bool.self, forKey: .ignoreUserActivity) ?? false
+        speakerOnBattery =
+            try container.decodeIfPresent(Bool.self, forKey: .speakerOnBattery) ?? Self.defaultSpeakerOnBattery
         pollSeconds = try container.decodeIfPresent(Int.self, forKey: .pollSeconds) ?? Self.defaultPollSeconds
         blueutilPath = try container.decodeIfPresent(String.self, forKey: .blueutilPath)
         nowPlayingCLIPath = try container.decodeIfPresent(String.self, forKey: .nowPlayingCLIPath)

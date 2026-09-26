@@ -13,6 +13,7 @@ struct AppConfigTests {
         #expect(config.silenceTimeoutMinutes == AppConfig.defaultSilenceTimeoutMinutes)
         #expect(config.inputWindowMinutes == AppConfig.defaultInputWindowMinutes)
         #expect(config.ignoreUserActivity == false)
+        #expect(config.speakerOnBattery == AppConfig.defaultSpeakerOnBattery)
         #expect(config.pollSeconds == AppConfig.defaultPollSeconds)
         #expect(config.logLevel == AppConfig.defaultLogLevel)
     }

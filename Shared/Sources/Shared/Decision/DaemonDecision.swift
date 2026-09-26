@@ -8,6 +8,7 @@ public enum DaemonDecision: Equatable, Sendable {
 
     public enum StayReason: String, Sendable {
         case playing
+        case speakerOnPower
         case idleTooShort
         case silenceTooShort
     }
@@ -37,6 +38,12 @@ public enum DaemonDecision: Equatable, Sendable {
         // Playback is an absolute stop: never cut the music.
         if nowPlaying {
             return .stayConnected(reason: .playing)
+        }
+
+        // Requirement: a speaker on wall power is never disconnected —
+        // the whole point is saving its battery.
+        if !config.speakerOnBattery {
+            return .stayConnected(reason: .speakerOnPower)
         }
 
         // Inactivity is a safety net for apps with no playback signals
