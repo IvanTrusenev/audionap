@@ -6,6 +6,11 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9594B6153067F6C100D6C965 /* Shared in Frameworks */ = {isa = PBXBuildFile; productRef = 9594B6143067F6C100D6C965 /* Shared */; };
+		9594B6183067F6FD00D6C965 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 9594B6173067F6FD00D6C965 /* ArgumentParser */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		95750A0A306724ED009272AA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -60,6 +65,8 @@
 		957509F8306724A6009272AA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				9594B6183067F6FD00D6C965 /* ArgumentParser in Frameworks */,
+				9594B6153067F6C100D6C965 /* Shared in Frameworks */,
 			);
 		};
 		95750A03306724ED009272AA /* Frameworks */ = {
@@ -76,6 +83,7 @@
 				000000000000000000000010 /* App */,
 				957509FC306724A6009272AA /* Daemon */,
 				95750A07306724ED009272AA /* Tests */,
+				9594B6133067F6C100D6C965 /* Frameworks */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,6 +96,13 @@
 				95750A06306724ED009272AA /* AudioNapTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9594B6133067F6C100D6C965 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -125,6 +140,10 @@
 				957509FC306724A6009272AA /* Daemon */,
 			);
 			name = audionapd;
+			packageProductDependencies = (
+				9594B6143067F6C100D6C965 /* Shared */,
+				9594B6173067F6FD00D6C965 /* ArgumentParser */,
+			);
 			productName = audionapd;
 			productReference = 957509FB306724A6009272AA /* audionapd */;
 			productType = "com.apple.product-type.tool";
@@ -183,6 +202,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				951E819D3067454A006630FF /* XCLocalSwiftPackageReference "Shared" */,
+				9594B6163067F6FD00D6C965 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
@@ -561,6 +581,30 @@
 			relativePath = Shared;
 		};
 /* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9594B6163067F6FD00D6C965 /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.8.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9594B6143067F6C100D6C965 /* Shared */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 951E819D3067454A006630FF /* XCLocalSwiftPackageReference "Shared" */;
+			productName = Shared;
+		};
+		9594B6173067F6FD00D6C965 /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9594B6163067F6FD00D6C965 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 000000000000000000000000 /* Project object */;
 }
