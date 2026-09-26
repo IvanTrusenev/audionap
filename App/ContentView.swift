@@ -15,12 +15,16 @@ struct ContentView: View {
     @State private var errorMessage = ""
     /// Whether the alert is visible.
     @State private var showingError = false
+    /// Config: reads config.plist once, saves every slider change.
+    @State private var store = ConfigStore()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             statusRow
             Divider()
             controlsRow
+            Divider()
+            settingsSection
             Divider()
             quitRow
         }
@@ -55,6 +59,11 @@ struct ContentView: View {
             Button("Stop") { perform { try controller.stop() } }
                 .disabled(!controller.isRunning)
         }
+    }
+
+    /// Timeout sliders — changes persist to config.plist on every tick.
+    private var settingsSection: some View {
+        SettingsControls(store: store)
     }
 
     /// A window-style MenuBarExtra has no application menu, so the window
