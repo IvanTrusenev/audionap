@@ -35,6 +35,16 @@ struct AudioNapDaemon: ParsableCommand {
             return
         }
 
-        print("daemon loop: not implemented yet (M2.5)")
+        // Main loop: hot config via the watcher, clean exit via signals.
+        signal(SIGTERM) { _ in DaemonLoop.stop = true }
+        signal(SIGINT) { _ in DaemonLoop.stop = true }
+
+        let loop = DaemonLoop(config: AppConfig.load(from: Paths.configURL))
+        let watcher = ConfigWatcher()
+        watcher.start { newConfig in
+            loop.update(config: newConfig)
+        }
+
+        loop.run()
     }
 }

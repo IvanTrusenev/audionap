@@ -7,7 +7,7 @@ daemon *ARGS:
 
 # Автоформат кода пакета (swift-format, канон в .swift-format)
 format:
-    swift format format --in-place --recursive Shared/Sources Shared/Tests
+    swift format format --in-place --recursive Shared/Sources Shared/Tests Daemon
 
 # Тесты пакета Shared
 test:

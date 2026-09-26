@@ -18,7 +18,7 @@ public struct PowerAssertionSource: PlaybackSource {
         do {
             try process.run()
         } catch {
-            return false   // couldn't launch — don't crash, just report "not playing"
+            return false  // couldn't launch — don't crash, just report "not playing"
         }
         process.waitUntilExit()
 
