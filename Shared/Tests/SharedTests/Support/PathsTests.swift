@@ -1,9 +1,3 @@
-//
-//  PathsTests.swift
-//  Shared
-//
-//  Created by Ivan Trusenev on 26.09.2026.
-//
 import Testing
 
 @testable import Shared
@@ -44,11 +38,11 @@ struct PathsTests {
                 == ["Library", "Logs", "AudioNap"])
     }
 
-    @Test func daemonLogURLPointsIntoLogsDirrectory() {
+    @Test func daemonLogURLPointsIntoLogsDirectory() {
         #expect(Paths.daemonLogURL.lastPathComponent == "daemon.log")
     }
 
-    @Test func daemonErrorLogURLPointsIntoLogsDirrectory() {
+    @Test func daemonErrorLogURLPointsIntoLogsDirectory() {
         #expect(Paths.daemonErrorLogURL.lastPathComponent == "daemon-error.log")
     }
 }
