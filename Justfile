@@ -6,8 +6,8 @@ test:
 
 # Тесты + таблица покрытия
 coverage:
-    cd Shared && ./Scripts/coverage.sh
+    ./scripts/coverage.sh
 
 # Тесты + HTML-отчёт с подсветкой в браузере
 coverage-html:
-    cd Shared && ./Scripts/coverage.sh --html
+    ./scripts/coverage.sh --html

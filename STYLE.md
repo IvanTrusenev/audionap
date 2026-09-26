@@ -60,9 +60,8 @@ when the team agrees on a new convention.
 - Coverage: aim for full coverage of the core; numbers in tests are explicit
   scenario inputs, not magic — tests must not reuse production constants
   ```bash
-  cd Shared
-  ./Scripts/coverage.sh          # tests + coverage table
-  ./Scripts/coverage.sh --html   # also open a highlighted report in the browser
+  just coverage                    # tests + coverage table (repo root)
+  just coverage-html               # also open a highlighted report in the browser
   ```
 
 ## Git

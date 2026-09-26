@@ -1,9 +1,9 @@
 #!/bin/bash
 # Прогоняет тесты пакета Shared с профилем покрытия и показывает таблицу.
-# Опционально: ./Scripts/coverage.sh --html — дополнительно откроет страницу
+# Опционально: ./scripts/coverage.sh --html — дополнительно откроет страницу
 # с подсветкой строк в браузере.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../Shared"
 
 BIN=.build/out/Products/Debug/SharedTests.xctest/Contents/MacOS/SharedTests
 PROFDATA=.build/out/Products/Debug/codecov/default.profdata
