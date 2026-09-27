@@ -5,6 +5,14 @@ daemon *ARGS:
     xcodebuild -project AudioNap.xcodeproj -scheme audionapd build
     BIN=$(find ~/Library/Developer/Xcode/DerivedData -name audionapd -type f -path '*Debug*' | head -1); "$BIN" {{ARGS}}
 
+# Пересобрать демона, развернуть в Application Support и перезапустить агента
+# (launchd исполняет копию бинаря — сборка сама её не обновляет)
+deploy-daemon:
+    xcodebuild -project AudioNap.xcodeproj -scheme audionapd build
+    BIN=$(find ~/Library/Developer/Xcode/DerivedData -name audionapd -type f -path '*Debug*' | head -1); cp "$BIN" "$HOME/Library/Application Support/AudioNap/audionapd"
+    launchctl kickstart -k gui/$(id -u)/online.threealab.audionap.daemon
+    tail "$HOME/Library/Logs/AudioNap/daemon.log"
+
 # Автоформат кода пакета (swift-format, канон в .swift-format)
 format:
     swift format format --in-place --recursive Shared/Sources Shared/Tests Daemon
