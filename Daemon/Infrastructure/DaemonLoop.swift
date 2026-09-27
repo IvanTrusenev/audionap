@@ -70,7 +70,7 @@ public final class DaemonLoop {
             "config reloaded: silence=\(config.silenceTimeoutMinutes)m input=\(config.inputWindowMinutes)m"
         )
     }
-    
+
     /// Set by the SIGTERM/SIGINT handler from a signal context — hence
     /// `nonisolated(unsafe)`; the loop only reads it between steps.
     public nonisolated(unsafe) static var stop = false
