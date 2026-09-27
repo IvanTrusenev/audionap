@@ -13,6 +13,10 @@ struct DeviceSection: View {
     @State private var manualInput = ""
     /// True when the last submit was not a MAC address.
     @State private var showingInvalidHint = false
+    /// Text of the last reconnect failure, shown in an alert.
+    @State private var errorMessage = ""
+    /// Whether the error alert is visible.
+    @State private var showingError = false
     /// Verbatim empty title — a literal "" would become a localization key.
     private let emptyTitle = ""
     
@@ -22,6 +26,8 @@ struct DeviceSection: View {
                 Text("device.title").font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Button("action.refresh") { refresh() }
+                Button("action.reconnect") { performReconnect() }
+                    .disabled(store.speakerMAC == nil)
             }
             Picker("device.title", selection: selectedMAC) {
                 Text("device.none").tag(String?.none)
@@ -44,6 +50,11 @@ struct DeviceSection: View {
         .onChange(of: store.speakerMAC) { _, newValue in
             manualInput = newValue ?? ""
             showingInvalidHint = false
+        }
+        .alert("error.title", isPresented: $showingError) {
+            Button("action.ok") {}
+        } message: {
+            Text(errorMessage)
         }
     }
 
@@ -69,7 +80,7 @@ struct DeviceSection: View {
     }
 
     private func reloadDevices() async {
-        devices = await BlueutilDeviceSource.pairedDevices()
+        devices = await BlueutilRunner.pairedDevices()
     }
 
     /// Commits the manual entry when it normalizes to a MAC; otherwise
@@ -80,5 +91,19 @@ struct DeviceSection: View {
             return
         }
         store.speakerMAC = normalized
+    }
+    
+    /// Reconnects the selected speaker through blueutil; failures
+    /// surface in the alert.
+    private func performReconnect() {
+        guard let mac = store.speakerMAC else { return }
+        Task {
+            do {
+                try await BlueutilRunner.connect(to: mac)
+            } catch {
+                errorMessage = error.localizedDescription
+                showingError = true
+            }
+        }
     }
 }

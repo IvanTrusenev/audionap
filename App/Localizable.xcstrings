@@ -408,6 +408,60 @@
           }
         }
       }
+    },
+    "action.reconnect": {
+      "comment": "The button that reconnects the selected speaker.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect again"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключить заново"
+          }
+        }
+      }
+    },
+    "error.connectFailed %lld": {
+      "comment": "Shown when blueutil could not reconnect the device; the argument is the exit code.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not connect the device (blueutil exited with code %1$lld)."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось подключить устройство (blueutil завершился с кодом %1$lld)."
+          }
+        }
+      }
+    },
+    "error.blueutilNotFound": {
+      "comment": "Shown when the blueutil binary is not installed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "blueutil is not installed."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "blueutil не установлен."
+          }
+        }
+      }
     }
   },
   "version": "1.3"
