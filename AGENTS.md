@@ -38,6 +38,10 @@ user inactivity, letting the speaker's own power-off timer finish the job.
   `AppTheme` injected through the environment; views reference meanings
   (`statusActive`), never raw hues, and generated asset symbols keep the
   references compile-time checked.
+- App Info.plists live in `Config/` (per-configuration split): both carry
+  `NSBluetoothAlwaysUsageDescription` (blueutil aborts under the TCC gate
+  without it), release also carries `LSMultipleInstancesProhibited` (debug
+  keeps it off so preview hosts can't block the Run loop).
 - `--test-once` runs one detection pass and never disconnects.
 - Package tests run via `swift test` in `Shared/` (Xcode 27 does not expose SPM
   test targets in test plans without a workspace; verified 2026-09-26).
@@ -48,6 +52,8 @@ M0 ✓ research; M1 ✓ skeleton (App/Daemon/Tests folders, shared schemes, publ
 repo); M2 ✓ daemon (Shared package: AppConfig, DaemonDecision, monitors,
 ConfigWatcher, run loop; live run 2026-09-26 showed the full
 silence+idle→disconnect cycle); M3 ✓ menu bar app (status, Start/Stop,
-hot config sliders, log tail). Next: M4 (device picker,
-ignoreUserActivity toggle, reconnect button, e2e check with the real
-speaker).
+hot config sliders, log tail). M4 ✓ device picker (blueutil list + manual
+MAC), connect/disconnect toggle, ignoreUserActivity toggle; live e2e
+2026-09-28: silence+idle → disconnect → speaker powered off by its own
+timer. Next: M5 (packaging + release: build script, zips, GitHub release,
+Homebrew tap).
