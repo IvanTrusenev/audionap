@@ -10,13 +10,17 @@ public struct AppTheme: Sendable {
     public var statusActive: Color
     /// The status dot while the daemon is stopped.
     public var statusInactive: Color
+    /// The neutral color of the daemon controls while an operation
+    /// is in flight.
+    public var statusTransitioning: Color
 
     /// The app's default theme, injected once at the root. The asset
     /// symbols are compile-time checked — a renamed Color Set breaks the
     /// build, not just the look.
     public static let standard = AppTheme(
         statusActive: Color(.statusActive),
-        statusInactive: Color(.statusInactive)
+        statusInactive: Color(.statusInactive),
+        statusTransitioning: Color(.statusTransitioning)
     )
 }
 

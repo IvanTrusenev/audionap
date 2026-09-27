@@ -9,25 +9,73 @@ import Shared
 @MainActor
 @Observable
 public final class DaemonController {
-    public private(set) var isRunning = false
+    public private(set) var status: DaemonStatus = .stopped
 
     /// launchd label: online.threealab.audionap.daemon (matches the plist file name).
-    private var label: String { AppIdentity.bundleID + ".daemon" }
+    nonisolated private static let label = "\(AppIdentity.bundleID).daemon"
     /// launchd domain: gui/<uid> — the user's login session.
-    private var domain: String { "gui/\(getuid())" }
+    nonisolated private static var domain: String { "gui/\(getuid())" }
 
     public init() {}
 
-    /// Queries launchd and updates `isRunning`.
+    /// Queries launchd and updates `status`. No-op while an operation is
+    /// in flight — a stale reading must not clobber `transitioning`.
     public func refreshStatus() {
-        let result = runLaunchctl(arguments: ["print", "\(domain)/\(label)"])
-        isRunning = LaunchctlParser.isRunning(output: result.output)
+        guard !status.isTransitioning else { return }
+        settle()
     }
 
     /// Start: write the canonical plist, then (re)bootstrap the agent.
     /// bootout first is required — bootstrap fails with exit code 5 while
-    /// a previous instance of the service is still in the domain.
-    public func start() throws {
+    /// a previous instance of the service is still in the domain. The
+    /// blocking launchctl sequence runs off the main actor, so the UI
+    /// stays responsive and shows `transitioning` meanwhile.
+    public func start() async throws {
+        status = DaemonStatus.next(from: status, event: .operationStarted)
+        do {
+            try await Task.detached(priority: .userInitiated) {
+                try Self.startBlocking()
+            }.value
+        } catch {
+            settle()
+            throw error
+        }
+        settle()
+    }
+
+    /// Stop: bootout the agent.
+    public func stop() async throws {
+        status = DaemonStatus.next(from: status, event: .operationStarted)
+        do {
+            try await Task.detached(priority: .userInitiated) {
+                let result = Self.runLaunchctl(
+                    arguments: ["bootout", "\(Self.domain)/\(Self.label)"])
+                // exit code 3 = "No such process": the service is already
+                // gone, which is exactly the state stop() wants to reach.
+                guard result.exitCode == 0 || result.exitCode == 3 else {
+                    throw DaemonControlError.bootoutFailed(exitCode: result.exitCode)
+                }
+            }.value
+        } catch {
+            settle()
+            throw error
+        }
+        settle()
+    }
+
+    /// Overwrites `status` from a fresh launchctl reading (unlike
+    /// `refreshStatus`, which refuses during a transition).
+    private func settle() {
+        let result = Self.runLaunchctl(
+            arguments: ["print", "\(Self.domain)/\(Self.label)"])
+        status = DaemonStatus.next(
+            from: status,
+            event: .operationSettled(
+                running: LaunchctlParser.isRunning(output: result.output)))
+    }
+
+    /// The blocking part of `start()`, safe to run off the main actor.
+    nonisolated private static func startBlocking() throws {
         try writeLaunchAgentPlist()
 
         _ = runLaunchctl(arguments: ["bootout", "\(domain)/\(label)"])
@@ -35,12 +83,11 @@ public final class DaemonController {
         if exitCode != 0 {
             // A retry can land on the far side of the race: bootstrap may
             // have failed while the job actually loaded. Trust launchd.
-            refreshStatus()
-            if !isRunning {
+            let output = runLaunchctl(arguments: ["print", "\(domain)/\(label)"]).output
+            if !LaunchctlParser.isRunning(output: output) {
                 throw DaemonControlError.bootstrapFailed(exitCode: exitCode)
             }
         }
-        refreshStatus()
     }
 
     /// bootout removes the service from the domain asynchronously, so a
@@ -48,7 +95,7 @@ public final class DaemonController {
     /// fail with exit code 5. Retry until `deadline` — launchd's exit
     /// timeout (5s for this job) bounds the teardown — and report the
     /// last exit code.
-    private func bootstrapWithRetry() -> Int32 {
+    nonisolated private static func bootstrapWithRetry() -> Int32 {
         let deadline = Date().addingTimeInterval(5)
         var exitCode: Int32 = -1
         repeat {
@@ -63,19 +110,8 @@ public final class DaemonController {
         return exitCode
     }
 
-    /// Stop: bootout the agent.
-    public func stop() throws {
-        let result = runLaunchctl(arguments: ["bootout", "\(domain)/\(label)"])
-        // exit code 3 = "No such process": the service is already gone,
-        // which is exactly the state stop() wants to reach.
-        guard result.exitCode == 0 || result.exitCode == 3 else {
-            throw DaemonControlError.bootoutFailed(exitCode: result.exitCode)
-        }
-        refreshStatus()
-    }
-
     /// Writes the canonical launch agent plist into Application Support.
-    private func writeLaunchAgentPlist() throws {
+    nonisolated private static func writeLaunchAgentPlist() throws {
         let daemonURL = Paths.daemonURL
         let spec = LaunchAgentSpec(
             label: label,
@@ -89,7 +125,7 @@ public final class DaemonController {
         try data.write(to: Paths.launchAgentTemplateURL, options: .atomic)
     }
 
-    private func runLaunchctl(arguments: [String]) -> (output: String, exitCode: Int32) {
+    nonisolated private static func runLaunchctl(arguments: [String]) -> (output: String, exitCode: Int32) {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
         process.arguments = arguments
@@ -107,7 +143,7 @@ public final class DaemonController {
     }
 }
 
-public enum DaemonControlError: Error {
+public enum DaemonControlError: Error, Sendable {
     case bootstrapFailed(exitCode: Int32)
     case bootoutFailed(exitCode: Int32)
 }

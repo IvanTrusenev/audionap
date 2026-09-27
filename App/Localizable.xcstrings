@@ -265,6 +265,24 @@
         }
       }
     },
+    "status.daemon.starting": {
+      "comment": "Status and button text while the daemon is being started.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запуск…"
+          }
+        }
+      }
+    },
     "status.daemon.stopped": {
       "comment": "Status row text while the daemon is stopped.",
       "extractionState": "manual",
@@ -279,6 +297,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Демон остановлен"
+          }
+        }
+      }
+    },
+    "status.daemon.stopping": {
+      "comment": "Status and button text while the daemon is being stopped.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopping…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановка…"
           }
         }
       }

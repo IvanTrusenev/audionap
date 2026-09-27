@@ -47,27 +47,85 @@ struct ContentView: View {
             Text(errorMessage)
         }
     }
-
+    
     /// Colored dot + state text + manual refresh.
     private var statusRow: some View {
         HStack(spacing: 8) {
             Circle()
-                .fill(controller.isRunning ? theme.statusActive : theme.statusInactive)
+                .fill(stateColor)
                 .frame(width: 8, height: 8)
-            Text(controller.isRunning ? "status.daemon.running" : "status.daemon.stopped")
+            Text(statusText)
             Spacer()
             Button("action.refresh") { controller.refreshStatus() }
         }
     }
 
-    /// Start/Stop. Each button is disabled in the state where it would be
-    /// pointless: starting a running daemon, stopping a stopped one.
+    /// Semantic color per daemon state: active, inactive, or neutral
+    /// while an operation is in flight.
+    private var stateColor: Color {
+        switch controller.status {
+        case .running: theme.statusActive
+        case .stopped: theme.statusInactive
+        case .starting, .stopping: theme.statusTransitioning
+        }
+    }
+
+    /// The button shows the action it performs, not the current state:
+    /// starting is a positive action (active), stopping a negative one
+    /// (inactive), transitions are neutral.
+    private var actionColor: Color {
+        switch controller.status {
+        case .running: theme.statusInactive
+        case .stopped: theme.statusActive
+        case .starting, .stopping: theme.statusTransitioning
+        }
+    }
+    
+    /// Status text per state. `LocalizedStringKey`, not `String` — a
+    /// plain String variable would hit `Text(verbatim:)` and skip
+    /// localization.
+    private var statusText: LocalizedStringKey {
+        switch controller.status {
+        case .running: "status.daemon.running"
+        case .stopped: "status.daemon.stopped"
+        case .starting: "status.daemon.starting"
+        case .stopping: "status.daemon.stopping"
+        }
+    }
+    
+    /// One toggle button: starts or stops depending on the daemon state.
+    /// During a transition the button is disabled and shows a spinner —
+    /// launchd settles jobs asynchronously, so the state is not instant.
     private var controlsRow: some View {
-        HStack {
-            Button("action.start") { perform { try controller.start() } }
-                .disabled(controller.isRunning)
-            Button("action.stop") { perform { try controller.stop() } }
-                .disabled(!controller.isRunning)
+        Button {
+            perform {
+                if controller.status == .running {
+                    try await controller.stop()
+                } else {
+                    try await controller.start()
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                if controller.status.isTransitioning {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: controller.status == .running ? "stop.fill" : "play.fill")
+                }
+                Text(buttonTitle)
+            }
+            .foregroundStyle(actionColor)
+        }
+        .disabled(controller.status.isTransitioning)
+    }
+
+    private var buttonTitle: LocalizedStringKey {
+        switch controller.status {
+        case .running: "action.stop"
+        case .stopped: "action.start"
+        case .starting: "status.daemon.starting"
+        case .stopping: "status.daemon.stopping"
         }
     }
 
@@ -90,13 +148,17 @@ struct ContentView: View {
         }
     }
 
-    /// Runs a throwing control action; failures surface in the alert.
-    private func perform(_ action: () throws -> Void) {
-        do {
-            try action()
-        } catch {
-            errorMessage = error.localizedDescription
-            showingError = true
+    /// Runs a throwing control action asynchronously; failures surface in
+    /// the alert. The task inherits the main actor, so the UI stays
+    /// responsive while the blocking launchctl work runs off the actor.
+    private func perform(_ action: @escaping () async throws -> Void) {
+        Task {
+            do {
+                try await action()
+            } catch {
+                errorMessage = error.localizedDescription
+                showingError = true
+            }
         }
     }
 }
