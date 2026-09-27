@@ -17,17 +17,37 @@ struct DeviceSection: View {
     @State private var errorMessage = ""
     /// Whether the error alert is visible.
     @State private var showingError = false
+    /// Last known connection state; refreshed on open, after each
+    /// action, and by a poll while the window is open.
+    @State private var isConnected = false
+    /// True while a connect/disconnect operation is in flight.
+    @State private var isUpdatingConnection = false
     /// Verbatim empty title — a literal "" would become a localization key.
     private let emptyTitle = ""
-    
+
+    @Environment(\.appTheme) private var theme
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text("device.title").font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Button("action.refresh") { refresh() }
-                Button("action.reconnect") { performReconnect() }
-                    .disabled(store.speakerMAC == nil)
+                Button {
+                    performToggle()
+                } label: {
+                    HStack(spacing: 6) {
+                        if isUpdatingConnection {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "antenna.radiowaves.left.and.right")
+                        }
+                        Text(isConnected ? "action.disconnect" : "action.connect")
+                    }
+                    .foregroundStyle(isConnected ? theme.statusInactive : theme.statusActive)
+                }
+                .disabled(store.speakerMAC == nil || isUpdatingConnection)
             }
             Picker("device.title", selection: selectedMAC) {
                 Text("device.none").tag(String?.none)
@@ -46,7 +66,11 @@ struct DeviceSection: View {
                 Text("device.invalidMAC").font(.caption).foregroundStyle(.secondary)
             }
         }
-        .task { await reloadDevices() }
+        .task {
+            await reloadDevices()
+            await refreshConnectionState()
+            await pollConnectionState()
+        }
         .onChange(of: store.speakerMAC) { _, newValue in
             manualInput = newValue ?? ""
             showingInvalidHint = false
@@ -93,17 +117,46 @@ struct DeviceSection: View {
         store.speakerMAC = normalized
     }
     
-    /// Reconnects the selected speaker through blueutil; failures
-    /// surface in the alert.
-    private func performReconnect() {
+    /// Re-reads the connection state from blueutil; no-op without a
+    /// selected device.
+    private func refreshConnectionState() async {
+        guard let mac = store.speakerMAC else {
+            isConnected = false
+            return
+        }
+        isConnected = await BlueutilRunner.isConnected(to: mac)
+    }
+
+    /// Polls the connection state every 2 s while the window is open —
+    /// the task is cancelled when the view disappears. Skips polling
+    /// while an operation is in flight.
+    private func pollConnectionState() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2))
+            guard !isUpdatingConnection else { continue }
+            await refreshConnectionState()
+        }
+    }
+
+    /// Connects or disconnects depending on the last known state;
+    /// re-reads the state after the operation, failures surface in the
+    /// alert.
+    private func performToggle() {
         guard let mac = store.speakerMAC else { return }
+        isUpdatingConnection = true
         Task {
             do {
-                try await BlueutilRunner.connect(to: mac)
+                if isConnected {
+                    try await BlueutilRunner.disconnect(from: mac)
+                } else {
+                    try await BlueutilRunner.connect(to: mac)
+                }
             } catch {
                 errorMessage = error.localizedDescription
                 showingError = true
             }
+            await refreshConnectionState()
+            isUpdatingConnection = false
         }
     }
 }

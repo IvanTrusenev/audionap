@@ -3,6 +3,7 @@ import Foundation
 public enum BlueutilRunnerError: Error, Sendable {
     case notFound
     case connectFailed(exitCode: Int32)
+    case disconnectFailed(exitCode: Int32)
 }
 
 /// Human-readable messages for the UI; the view shows
@@ -15,6 +16,8 @@ extension BlueutilRunnerError: LocalizedError {
         case .connectFailed(let exitCode):
             // Int64, not Int — see the same note in DaemonControlError.
             String(localized: "error.connectFailed \(Int64(exitCode))")
+        case .disconnectFailed(let exitCode):
+            String(localized: "error.disconnectFailed \(Int64(exitCode))")
         }
     }
 }

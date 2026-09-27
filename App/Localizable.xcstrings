@@ -1,6 +1,42 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "action.connect": {
+      "comment": "The toggle action when the device is disconnected.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключить"
+          }
+        }
+      }
+    },
+    "action.disconnect": {
+      "comment": "The toggle action when the device is connected.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disconnect"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отключить"
+          }
+        }
+      }
+    },
     "action.ok": {
       "comment": "The label of a button that dismisses an alert.",
       "extractionState": "manual",
@@ -175,6 +211,24 @@
         }
       }
     },
+    "error.blueutilNotFound": {
+      "comment": "Shown when the blueutil binary is not installed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "blueutil is not installed."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "blueutil не установлен."
+          }
+        }
+      }
+    },
     "error.bootoutFailed %lld": {
       "comment": "Shown when the daemon could not be stopped; the argument is the launchctl exit code.",
       "extractionState": "manual",
@@ -207,6 +261,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Не удалось запустить демон (launchctl завершился с кодом %1$lld)."
+          }
+        }
+      }
+    },
+    "error.connectFailed %lld": {
+      "comment": "Shown when blueutil could not reconnect the device; the argument is the exit code.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not connect the device (blueutil exited with code %1$lld)."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось подключить устройство (blueutil завершился с кодом %1$lld)."
+          }
+        }
+      }
+    },
+    "error.disconnectFailed %lld": {
+      "comment": "Shown when blueutil could not disconnect the device; the argument is the exit code.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not disconnect the device (blueutil exited with code %1$lld)."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось отключить устройство (blueutil завершился с кодом %1$lld)."
           }
         }
       }
@@ -405,60 +495,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Остановка…"
-          }
-        }
-      }
-    },
-    "action.reconnect": {
-      "comment": "The button that reconnects the selected speaker.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connect again"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Подключить заново"
-          }
-        }
-      }
-    },
-    "error.connectFailed %lld": {
-      "comment": "Shown when blueutil could not reconnect the device; the argument is the exit code.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not connect the device (blueutil exited with code %1$lld)."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не удалось подключить устройство (blueutil завершился с кодом %1$lld)."
-          }
-        }
-      }
-    },
-    "error.blueutilNotFound": {
-      "comment": "Shown when the blueutil binary is not installed.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "blueutil is not installed."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "blueutil не установлен."
           }
         }
       }

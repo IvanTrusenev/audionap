@@ -29,6 +29,29 @@ public enum BlueutilRunner {
             }
         }.value
     }
+    
+    /// Whether the device is connected, per blueutil.
+    public static func isConnected(to address: String) async -> Bool {
+        await Task.detached(priority: .userInitiated) {
+            guard let result = runBlocking(arguments: ["--is-connected", address]) else {
+                return false
+            }
+            return BlueutilParser.isConnected(output: result.output)
+        }.value
+    }
+
+    /// Disconnects the device — the manual counterpart of the daemon's
+    /// automatic disconnect.
+    public static func disconnect(from address: String) async throws {
+        try await Task.detached(priority: .userInitiated) {
+            guard let result = runBlocking(arguments: ["--disconnect", address]) else {
+                throw BlueutilRunnerError.notFound
+            }
+            guard result.exitCode == 0 else {
+                throw BlueutilRunnerError.disconnectFailed(exitCode: result.exitCode)
+            }
+        }.value
+    }
 
     /// Runs blueutil by its resolved absolute path; nil when the binary
     /// is missing. `nonisolated` — detached closures call this off the
