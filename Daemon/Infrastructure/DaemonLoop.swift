@@ -54,14 +54,14 @@ public final class DaemonLoop {
             quietSeconds = 0
         }
 
-        print("step: \(decision) quiet=\(quietSeconds)s idle=\(idleSeconds)s")
+        DaemonLog.print("step: \(decision) quiet=\(quietSeconds)s idle=\(idleSeconds)s")
     }
 
     /// Applies a reloaded config — the watcher calls this on the main queue,
     /// the same queue the loop runs on, so no data race is possible.
     public func update(config: AppConfig) {
         self.config = config
-        print(
+        DaemonLog.print(
             "config reloaded: silence=\(config.silenceTimeoutMinutes)m input=\(config.inputWindowMinutes)m"
         )
     }
