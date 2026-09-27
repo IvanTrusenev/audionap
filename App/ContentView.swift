@@ -19,8 +19,10 @@ struct ContentView: View {
             ControlRow(controller: controller)
             Divider()
             settingsSection
+            #if DEBUG
             Divider()
             logSection
+            #endif
             Divider()
             quitRow
         }
