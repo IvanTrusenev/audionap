@@ -24,6 +24,13 @@ struct SettingsControls: View {
                 ),
                 range: AppConfig.inputWindowRange
             )
+            Toggle(
+                "settings.ignoreUserActivity",
+                isOn: Binding(
+                    get: { store.ignoreUserActivity },
+                    set: { store.ignoreUserActivity = $0 }
+                )
+            )
         }
     }
 

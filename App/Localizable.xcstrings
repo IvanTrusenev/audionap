@@ -283,6 +283,24 @@
         }
       }
     },
+    "settings.ignoreUserActivity": {
+      "comment": "The toggle that makes the daemon count only silence, ignoring user input.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore user activity"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Игнорировать активность пользователя"
+          }
+        }
+      }
+    },
     "settings.silenceTimeout": {
       "comment": "The title of the silence timeout slider.",
       "extractionState": "manual",

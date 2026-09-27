@@ -18,12 +18,12 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             ControlRow(controller: controller)
             Divider()
-            deviceSection
+            DeviceSection(store: store)
             Divider()
-            settingsSection
+            SettingsControls(store: store)
             #if DEBUG
             Divider()
-            logSection
+            LogSection(reader: logReader)
             #endif
             Divider()
             quitRow
@@ -34,21 +34,6 @@ struct ContentView: View {
             controller.refreshStatus()
             logReader.refresh()
         }
-    }
-
-    /// The speaker picker and the manual MAC entry.
-    private var deviceSection: some View {
-        DeviceSection(store: store)
-    }
-    
-    /// Timeout sliders — changes persist to config.plist on every tick.
-    private var settingsSection: some View {
-        SettingsControls(store: store)
-    }
-
-    /// The daemon log tail — see what the daemon is doing without a terminal.
-    private var logSection: some View {
-        LogSection(reader: logReader)
     }
 
     /// A window-style MenuBarExtra has no application menu, so the window

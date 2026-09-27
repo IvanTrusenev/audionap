@@ -46,6 +46,16 @@ public final class ConfigStore {
         }
     }
 
+    /// When on, the daemon ignores user input and counts only silence
+    /// toward the disconnect. Persisted on every write, hot-reloaded.
+    public var ignoreUserActivity: Bool {
+        get { config.ignoreUserActivity }
+        set {
+            config.ignoreUserActivity = newValue
+            persist()
+        }
+    }
+
     private func persist() {
         do {
             try config.save(to: Paths.configURL)

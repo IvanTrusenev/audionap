@@ -67,7 +67,7 @@ public final class DaemonLoop {
         guard config != self.config else { return }
         self.config = config
         DaemonLog.print(
-            "config reloaded: silence=\(config.silenceTimeoutMinutes)m input=\(config.inputWindowMinutes)m"
+            "config reloaded: speaker=\(config.speakerMAC ?? "none") silence=\(config.silenceTimeoutMinutes)m input=\(config.inputWindowMinutes)m ignoreActivity=\(config.ignoreUserActivity)"
         )
     }
 
