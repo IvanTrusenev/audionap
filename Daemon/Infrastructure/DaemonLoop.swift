@@ -59,13 +59,18 @@ public final class DaemonLoop {
 
     /// Applies a reloaded config — the watcher calls this on the main queue,
     /// the same queue the loop runs on, so no data race is possible.
+    /// Silent no-op when the content is unchanged: the watcher fires both an
+    /// immediate load at start and directory events for unrelated writes
+    /// (the app's own launchagent.plist), which otherwise logged a spurious
+    /// "config reloaded" pair on every start.
     public func update(config: AppConfig) {
+        guard config != self.config else { return }
         self.config = config
         DaemonLog.print(
             "config reloaded: silence=\(config.silenceTimeoutMinutes)m input=\(config.inputWindowMinutes)m"
         )
     }
-
+    
     /// Set by the SIGTERM/SIGINT handler from a signal context — hence
     /// `nonisolated(unsafe)`; the loop only reads it between steps.
     public nonisolated(unsafe) static var stop = false
