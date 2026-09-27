@@ -13,7 +13,7 @@ struct SingleInstanceGuardTests {
         ]
         #expect(
             SingleInstanceGuard.action(
-                isTestRun: false, ownPID: 100, bundleID: bundleID, processes: processes
+                isHostedLaunch: false, ownPID: 100, bundleID: bundleID, processes: processes
             ) == 200
         )
     }
@@ -24,7 +24,7 @@ struct SingleInstanceGuardTests {
         ]
         #expect(
             SingleInstanceGuard.action(
-                isTestRun: false, ownPID: 100, bundleID: bundleID, processes: processes
+                isHostedLaunch: false, ownPID: 100, bundleID: bundleID, processes: processes
             ) == nil
         )
     }
@@ -35,7 +35,7 @@ struct SingleInstanceGuardTests {
         ]
         #expect(
             SingleInstanceGuard.action(
-                isTestRun: false, ownPID: 100, bundleID: bundleID, processes: processes
+                isHostedLaunch: false, ownPID: 100, bundleID: bundleID, processes: processes
             ) == nil
         )
     }
@@ -46,7 +46,7 @@ struct SingleInstanceGuardTests {
         ]
         #expect(
             SingleInstanceGuard.action(
-                isTestRun: false, ownPID: 100, bundleID: bundleID, processes: processes
+                isHostedLaunch: false, ownPID: 100, bundleID: bundleID, processes: processes
             ) == nil
         )
     }
@@ -60,7 +60,7 @@ struct SingleInstanceGuardTests {
         ]
         #expect(
             SingleInstanceGuard.action(
-                isTestRun: true, ownPID: 100, bundleID: bundleID, processes: processes
+                isHostedLaunch: true, ownPID: 100, bundleID: bundleID, processes: processes
             ) == nil
         )
     }
@@ -68,7 +68,7 @@ struct SingleInstanceGuardTests {
     @Test func missingBundleIDContinues() {
         #expect(
             SingleInstanceGuard.action(
-                isTestRun: false, ownPID: 100, bundleID: nil, processes: []
+                isHostedLaunch: false, ownPID: 100, bundleID: nil, processes: []
             ) == nil
         )
     }
