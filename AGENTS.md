@@ -34,6 +34,10 @@ user inactivity, letting the speaker's own power-off timer finish the job.
 - launchd label / bundle IDs: `online.threealab.audionap(.daemon)`; config at
   `~/Library/Application Support/AudioNap/config.plist` (atomic writes; invalid
   values → defaults + log, never crash).
+- UI design tokens: semantic Color Sets in the app asset catalog, consumed via
+  `AppTheme` injected through the environment; views reference meanings
+  (`statusActive`), never raw hues, and generated asset symbols keep the
+  references compile-time checked.
 - `--test-once` runs one detection pass and never disconnects.
 - Package tests run via `swift test` in `Shared/` (Xcode 27 does not expose SPM
   test targets in test plans without a workspace; verified 2026-09-26).

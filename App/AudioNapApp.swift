@@ -4,7 +4,7 @@ import SwiftUI
 struct AudioNapApp: App {
     var body: some Scene {
         MenuBarExtra("AudioNap", systemImage: "speaker.wave.2") {
-            ContentView()
+            ContentView().appTheme(.standard)
         }
         .menuBarExtraStyle(.window)
     }

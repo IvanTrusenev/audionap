@@ -19,6 +19,9 @@ struct ContentView: View {
     @State private var store = ConfigStore()
     /// Tail of daemon.log, refreshed on appear and by the Refresh button.
     @State private var logReader = LogReader()
+    
+    /// Design tokens, injected at the app root; defaults to `.standard`.
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -49,7 +52,7 @@ struct ContentView: View {
     private var statusRow: some View {
         HStack(spacing: 8) {
             Circle()
-                .fill(controller.isRunning ? Color.green : Color.red)
+                .fill(controller.isRunning ? theme.statusActive : theme.statusInactive)
                 .frame(width: 8, height: 8)
             Text(controller.isRunning ? "Daemon running" : "Daemon stopped")
             Spacer()
@@ -98,6 +101,13 @@ struct ContentView: View {
     }
 }
 
-#Preview {
+#Preview("Light") {
     ContentView()
+        .appTheme(.standard)
+}
+
+#Preview("Dark") {
+    ContentView()
+        .appTheme(.standard)
+        .preferredColorScheme(.dark)
 }
