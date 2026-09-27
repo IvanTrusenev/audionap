@@ -9,7 +9,7 @@ struct SettingsControls: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             slider(
-                title: "Silence timeout",
+                title: String(localized: "settings.silenceTimeout"),
                 binding: Binding(
                     get: { Double(store.silenceTimeoutMinutes) },
                     set: { store.silenceTimeoutMinutes = Int($0) }
@@ -17,7 +17,7 @@ struct SettingsControls: View {
                 range: AppConfig.silenceTimeoutRange
             )
             slider(
-                title: "Idle window",
+                title: String(localized: "settings.idleWindow"),
                 binding: Binding(
                     get: { Double(store.inputWindowMinutes) },
                     set: { store.inputWindowMinutes = Int($0) }
@@ -31,11 +31,13 @@ struct SettingsControls: View {
     /// Int setting travels through an explicit Double bridge; `step: 1`
     /// makes the setter fire on whole minutes only. The range comes from
     /// AppConfig — product limits live in one place.
+    /// The label is one localized template with two placeholders (title and
+    /// minute count), so the word order can differ per language.
     private func slider(
         title: String, binding: Binding<Double>, range: ClosedRange<Int>
     ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("\(title): \(Int(binding.wrappedValue)) min")
+            Text("settings.timeoutValue \(title) \(Int(binding.wrappedValue))")
             Slider(
                 value: binding,
                 in: Double(range.lowerBound)...Double(range.upperBound),

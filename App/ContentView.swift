@@ -41,8 +41,8 @@ struct ContentView: View {
             controller.refreshStatus()
             logReader.refresh()
         }
-        .alert("Daemon control error", isPresented: $showingError) {
-            Button("OK") {}
+        .alert("error.title", isPresented: $showingError) {
+            Button("action.ok") {}
         } message: {
             Text(errorMessage)
         }
@@ -54,9 +54,9 @@ struct ContentView: View {
             Circle()
                 .fill(controller.isRunning ? theme.statusActive : theme.statusInactive)
                 .frame(width: 8, height: 8)
-            Text(controller.isRunning ? "Daemon running" : "Daemon stopped")
+            Text(controller.isRunning ? "status.daemon.running" : "status.daemon.stopped")
             Spacer()
-            Button("Refresh") { controller.refreshStatus() }
+            Button("action.refresh") { controller.refreshStatus() }
         }
     }
 
@@ -64,9 +64,9 @@ struct ContentView: View {
     /// pointless: starting a running daemon, stopping a stopped one.
     private var controlsRow: some View {
         HStack {
-            Button("Start") { perform { try controller.start() } }
+            Button("action.start") { perform { try controller.start() } }
                 .disabled(controller.isRunning)
-            Button("Stop") { perform { try controller.stop() } }
+            Button("action.stop") { perform { try controller.stop() } }
                 .disabled(!controller.isRunning)
         }
     }
@@ -86,7 +86,7 @@ struct ContentView: View {
     private var quitRow: some View {
         HStack {
             Spacer()
-            Button("Quit") { NSApplication.shared.terminate(nil) }
+            Button("action.quit") { NSApplication.shared.terminate(nil) }
         }
     }
 

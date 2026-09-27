@@ -118,9 +118,13 @@ extension DaemonControlError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .bootstrapFailed(let exitCode):
-            "Could not start the daemon (launchctl exited with code \(exitCode))."
+            // Int64, not Int: the runtime lookup key for an interpolated
+            // integer is "%lld", and so is the extractor's key for Int64 —
+            // with plain Int Xcode's extractor derives "%d" and the catalog
+            // gains a junk key that never resolves.
+            String(localized: "error.bootstrapFailed \(Int64(exitCode))")
         case .bootoutFailed(let exitCode):
-            "Could not stop the daemon (launchctl exited with code \(exitCode))."
+            String(localized: "error.bootoutFailed \(Int64(exitCode))")
         }
     }
 }

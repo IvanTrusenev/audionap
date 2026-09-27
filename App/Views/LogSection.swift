@@ -7,12 +7,12 @@ struct LogSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text("Daemon log").font(.caption).foregroundStyle(.secondary)
+                Text("log.title").font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Button("Refresh") { reader.refresh() }
+                Button("action.refresh") { reader.refresh() }
             }
             if reader.lines.isEmpty {
-                Text("No log yet")
+                Text("log.empty")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
