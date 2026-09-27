@@ -17,6 +17,12 @@ public final class DaemonController {
     nonisolated private static var domain: String { "gui/\(getuid())" }
 
     public init() {}
+    
+    /// Creates a controller already in the given state — for previews,
+    /// which can't run real launchctl operations.
+    public init(status: DaemonStatus) {
+        self.status = status
+    }
 
     /// Queries launchd and updates `status`. No-op while an operation is
     /// in flight — a stale reading must not clobber `transitioning`.
