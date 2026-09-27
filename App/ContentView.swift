@@ -18,6 +18,8 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             ControlRow(controller: controller)
             Divider()
+            deviceSection
+            Divider()
             settingsSection
             #if DEBUG
             Divider()
@@ -34,6 +36,11 @@ struct ContentView: View {
         }
     }
 
+    /// The speaker picker and the manual MAC entry.
+    private var deviceSection: some View {
+        DeviceSection(store: store)
+    }
+    
     /// Timeout sliders — changes persist to config.plist on every tick.
     private var settingsSection: some View {
         SettingsControls(store: store)

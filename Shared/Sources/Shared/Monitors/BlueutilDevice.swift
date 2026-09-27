@@ -6,4 +6,6 @@ public struct BlueutilDevice: Equatable, Sendable {
     public let address: String
     /// The device's name, as set by its owner.
     public let name: String
+    /// Whether blueutil reports the device as connected.
+    public let connected: Bool
 }

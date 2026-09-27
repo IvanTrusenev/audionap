@@ -103,6 +103,78 @@
         }
       }
     },
+    "device.empty": {
+      "comment": "Shown when blueutil reports no paired devices.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No paired devices"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет парных устройств"
+          }
+        }
+      }
+    },
+    "device.invalidMAC": {
+      "comment": "Hint under the manual address field after invalid input.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not a Bluetooth address"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не похоже на адрес Bluetooth"
+          }
+        }
+      }
+    },
+    "device.none": {
+      "comment": "The picker option when no speaker is selected.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not selected"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не выбрано"
+          }
+        }
+      }
+    },
+    "device.title": {
+      "comment": "The title of the device section in the menu bar window.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Устройство"
+          }
+        }
+      }
+    },
     "error.bootoutFailed %lld": {
       "comment": "Shown when the daemon could not be stopped; the argument is the launchctl exit code.",
       "extractionState": "manual",

@@ -41,9 +41,8 @@ public final class LogReader {
         while true {
             let readStart = offset >= chunkSize ? offset - UInt64(chunkSize) : 0
             try? handle.seek(toOffset: readStart)
-            if let chunk = try? handle.readDataToEndOfFile() {
-                collected = chunk + collected
-            }
+            let chunk = handle.readDataToEndOfFile()
+            collected = chunk + collected
             let result = LogTailParser.lastLines(in: collected, limit: lineLimit)
             if result.count >= lineLimit || readStart == 0 {
                 return result

@@ -25,10 +25,23 @@ public final class ConfigStore {
         }
     }
 
+    /// Minutes of recent user input that keep the speaker connected —
+    /// the "input window" of the idle safety net. Persisted on every
+    /// write, hot-reloaded by the daemon.
     public var inputWindowMinutes: Int {
         get { config.inputWindowMinutes }
         set {
             config.inputWindowMinutes = newValue
+            persist()
+        }
+    }
+
+    /// The speaker the daemon babysits; nil = none selected. Written by
+    /// the device picker, hot-reloaded by the daemon like every setting.
+    public var speakerMAC: String? {
+        get { config.speakerMAC }
+        set {
+            config.speakerMAC = newValue
             persist()
         }
     }

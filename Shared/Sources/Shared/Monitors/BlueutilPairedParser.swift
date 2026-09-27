@@ -16,7 +16,12 @@ public enum BlueutilPairedParser {
         guard let address = address(in: line), let name = name(in: line) else {
             return nil
         }
-        return BlueutilDevice(address: address, name: name)
+
+        return BlueutilDevice(
+            address: address,
+            name: name,
+            connected: connected(in: line),
+        )
     }
 
     /// The first MAC-looking token in the line.
@@ -35,5 +40,11 @@ public enum BlueutilPairedParser {
             return nil
         }
         return String(match.1)
+    }
+
+    /// True when the line reports the device as connected (as opposed
+    /// to "not connected").
+    private static func connected(in line: String) -> Bool {
+        line.firstMatch(of: /, (connected)/) != nil
     }
 }
