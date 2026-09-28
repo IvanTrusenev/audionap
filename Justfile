@@ -34,3 +34,7 @@ coverage-html:
 # Build a universal Release app and verify arch, signature, and plist keys
 build:
     ./scripts/build.sh
+
+# Build and package release artifacts: just release 0.1.0
+release VERSION:
+    ./scripts/release.sh {{VERSION}}
