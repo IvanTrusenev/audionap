@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		95830C9C306B212C00B64903 /* audionapd in CopyFiles */ = {isa = PBXBuildFile; fileRef = 957509FB306724A6009272AA /* audionapd */; };
 		9594B6153067F6C100D6C965 /* Shared in Frameworks */ = {isa = PBXBuildFile; productRef = 9594B6143067F6C100D6C965 /* Shared */; };
 		9594B6183067F6FD00D6C965 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 9594B6173067F6FD00D6C965 /* ArgumentParser */; };
 		9594B6313068482200D6C965 /* Shared in Frameworks */ = {isa = PBXBuildFile; productRef = 9594B6303068482200D6C965 /* Shared */; };
@@ -20,6 +21,13 @@
 			remoteGlobalIDString = 000000000000000100000000;
 			remoteInfo = AudioNap;
 		};
+		95830C99306B209C00B64903 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 957509FA306724A6009272AA;
+			remoteInfo = audionapd;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,6 +38,14 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
+		};
+		95830C9B306B20C800B64903 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = Contents/Helpers;
+			dstSubfolder = Wrapper;
+			files = (
+				95830C9C306B212C00B64903 /* audionapd in CopyFiles */,
+			);
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -117,8 +133,12 @@
 				000000000000000120000000 /* Sources */,
 				000000000000000130000000 /* Frameworks */,
 				000000000000000140000000 /* Resources */,
+				95830C9B306B20C800B64903 /* CopyFiles */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				95830C9A306B209C00B64903 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				000000000000000000000010 /* App */,
@@ -257,6 +277,11 @@
 			isa = PBXTargetDependency;
 			target = 000000000000000100000000 /* AudioNap */;
 			targetProxy = 95750A0A306724ED009272AA /* PBXContainerItemProxy */;
+		};
+		95830C9A306B209C00B64903 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 957509FA306724A6009272AA /* audionapd */;
+			targetProxy = 95830C99306B209C00B64903 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -482,6 +507,7 @@
 		95750A00306724A6009272AA /* Debug configuration for PBXNativeTarget "audionapd" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				PRODUCT_BUNDLE_IDENTIFIER = online.threealab.audionap.daemon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -495,6 +521,7 @@
 		95750A01306724A6009272AA /* Release configuration for PBXNativeTarget "audionapd" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				PRODUCT_BUNDLE_IDENTIFIER = online.threealab.audionap.daemon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
