@@ -10,4 +10,9 @@ import Foundation
 /// without instances.
 public enum AppIdentity {
     public static let bundleID = "online.threealab.audionap"
+
+    /// Product version in lockstep with MARKETING_VERSION of the app target.
+    /// scripts/release.sh asserts all three (app plist, daemon --version,
+    /// this constant) match before packaging.
+    public static let version = "0.1.0"
 }

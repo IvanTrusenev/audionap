@@ -12,7 +12,7 @@ struct AudioNapDaemon: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "audionapd",
         abstract: "Disconnects a Bluetooth speaker after silence and inactivity.",
-        version: "0.1.0"
+        version: AppIdentity.version
     )
 
     @Flag(help: "Run one detection pass and print the result. Never disconnects.")
