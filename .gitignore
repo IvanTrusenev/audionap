@@ -11,6 +11,7 @@ dist/
 .build/
 .swiftpm/
 !.swiftpm/xcshareddata/
+*.profraw
 
 # macOS
 .DS_Store
