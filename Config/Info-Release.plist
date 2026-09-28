@@ -6,5 +6,7 @@
 	<string>AudioNap uses Bluetooth to see and manage your speaker connections.</string>
 	<key>LSMultipleInstancesProhibited</key>
 	<true/>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon.icns</string>
 </dict>
 </plist>

@@ -4,5 +4,7 @@
 <dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>AudioNap uses Bluetooth to see and manage your speaker connections.</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon.icns</string>
 </dict>
 </plist>
