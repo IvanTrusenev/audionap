@@ -20,8 +20,8 @@ public final class DaemonLoop {
     /// waiting" ping — silence in the log reads as death.
     private var waitingSteps = 0
 
-    private static let blueutilFailureThreshold = 30    // 5 min at a 10 s poll
-    private static let waitingPingEvery = 60            // 10 min at a 10 s poll
+    private static let blueutilFailureThreshold = 30  // 5 min at a 10 s poll
+    private static let waitingPingEvery = 60  // 10 min at a 10 s poll
 
     public init(config: AppConfig) {
         self.config = config

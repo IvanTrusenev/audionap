@@ -8,10 +8,12 @@ public struct PowerAssertionSource: PlaybackSource {
 
     /// True while the "Playing audio" assertion is held.
     public func isPlayingAudio() -> Bool {
-        guard let result = ProcessRunner.run(
-            executable: "/usr/bin/pmset",
-            arguments: ["-g", "assertions"]
-        ) else {
+        guard
+            let result = ProcessRunner.run(
+                executable: "/usr/bin/pmset",
+                arguments: ["-g", "assertions"]
+            )
+        else {
             return false  // couldn't launch — don't crash, just report "not playing"
         }
         return PowerAssertionParser.isPlayingAudio(in: result.stdout)
