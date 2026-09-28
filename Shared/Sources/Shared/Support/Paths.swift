@@ -20,6 +20,11 @@ public enum Paths {
     public static let daemonURL: URL =
         appSupportDirectory.appendingPathComponent("audionapd")
 
+    /// Version marker next to the installed daemon: contains
+    /// `AppIdentity.version` of the copy that was installed last.
+    public static let daemonVersionURL: URL =
+        appSupportDirectory.appendingPathComponent("audionapd.version")
+
     /// Live state for the UI: playing, quiet seconds, connection status.
     public static let stateURL: URL =
         appSupportDirectory.appendingPathComponent("state.plist")

@@ -12,7 +12,7 @@ public final class DaemonController {
     public private(set) var status: DaemonStatus = .stopped
 
     /// launchd label: online.threealab.audionap.daemon (matches the plist file name).
-    nonisolated private static let label = "\(AppIdentity.bundleID).daemon"
+    nonisolated static let label = "\(AppIdentity.bundleID).daemon"
     /// launchd domain: gui/<uid> — the user's login session.
     nonisolated private static var domain: String { "gui/\(getuid())" }
 
@@ -31,6 +31,12 @@ public final class DaemonController {
         settle()
     }
 
+    /// Whether the agent is currently running, per launchd.
+    nonisolated static func isAgentRunning() -> Bool {
+        let result = runLaunchctl(arguments: ["print", "\(domain)/\(label)"])
+        return LaunchctlParser.isRunning(output: result.output)
+    }
+    
     /// Start: write the canonical plist, then (re)bootstrap the agent.
     /// bootout first is required — bootstrap fails with exit code 5 while
     /// a previous instance of the service is still in the domain. The
@@ -131,7 +137,7 @@ public final class DaemonController {
         try data.write(to: Paths.launchAgentTemplateURL, options: .atomic)
     }
 
-    nonisolated private static func runLaunchctl(arguments: [String]) -> (output: String, exitCode: Int32) {
+    nonisolated static func runLaunchctl(arguments: [String]) -> (output: String, exitCode: Int32) {
         guard let result = ProcessRunner.run(executable: "/bin/launchctl", arguments: arguments) else {
             return ("", -1)
         }

@@ -11,8 +11,17 @@ struct ContentView: View {
     @State private var controller = DaemonController()
     /// Config: reads config.plist once, saves every slider change.
     @State private var store = ConfigStore()
+
     /// Tail of daemon.log, refreshed on appear and by the Refresh button.
     @State private var logReader = LogReader()
+
+    /// Provisions the bundled daemon on first window open.
+    @State private var installer = DaemonInstaller()
+
+    /// Install failures surface in an alert (same pattern as ControlRow).
+    @State private var installErrorMessage = ""
+
+    @State private var showingInstallError = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -33,6 +42,26 @@ struct ContentView: View {
         .onAppear {
             controller.refreshStatus()
             logReader.refresh()
+        }
+        .task {
+            // Preview hosts run the whole app (same bundle ID) and unit
+            // tests host it too — neither should install the daemon.
+            let environment = ProcessInfo.processInfo.environment
+            guard environment["XCODE_RUNNING_FOR_PREVIEWS"] != "1",
+                  environment["XCTestConfigurationFilePath"] == nil else {
+                return
+            }
+            do {
+                _ = try await installer.ensureInstalled()
+            } catch {
+                installErrorMessage = error.localizedDescription
+                showingInstallError = true
+            }
+        }
+        .alert("error.daemonInstall.title", isPresented: $showingInstallError) {
+            Button("action.ok") {}
+        } message: {
+            Text(installErrorMessage)
         }
     }
 

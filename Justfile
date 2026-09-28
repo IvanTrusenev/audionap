@@ -10,6 +10,8 @@ daemon *ARGS:
 deploy-daemon:
     xcodebuild -project AudioNap.xcodeproj -scheme audionapd build
     BIN=$(find ~/Library/Developer/Xcode/DerivedData -name audionapd -type f -path '*Debug*' | head -1); cp "$BIN" "$HOME/Library/Application Support/AudioNap/audionapd"
+    # Stamp the version marker so the app's DaemonInstaller doesn't overwrite the dev copy
+    echo "0.1.0" > "$HOME/Library/Application Support/AudioNap/audionapd.version"
     launchctl kickstart -k gui/$(id -u)/online.threealab.audionap.daemon
     tail "$HOME/Library/Logs/AudioNap/daemon.log"
 

@@ -1,504 +1,542 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "action.connect": {
-      "comment": "The toggle action when the device is disconnected.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connect"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "action.connect" : {
+      "comment" : "The toggle action when the device is disconnected.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Подключить"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключить"
           }
         }
       }
     },
-    "action.disconnect": {
-      "comment": "The toggle action when the device is connected.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Disconnect"
+    "action.disconnect" : {
+      "comment" : "The toggle action when the device is connected.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disconnect"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Отключить"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключить"
           }
         }
       }
     },
-    "action.ok": {
-      "comment": "The label of a button that dismisses an alert.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
+    "action.ok" : {
+      "comment" : "The label of a button that dismisses an alert.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
     },
-    "action.quit": {
-      "comment": "The label of a button that quits the app.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quit"
+    "action.quit" : {
+      "comment" : "The label of a button that quits the app.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Выйти"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выйти"
           }
         }
       }
     },
-    "action.refresh": {
-      "comment": "The label of a button that refreshes the current view.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Refresh"
+    "action.refresh" : {
+      "comment" : "The label of a button that refreshes the current view.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обновить"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновить"
           }
         }
       }
     },
-    "action.start": {
-      "comment": "The label of a button that starts the daemon.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start"
+    "action.start" : {
+      "comment" : "The label of a button that starts the daemon.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Запустить"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запустить"
           }
         }
       }
     },
-    "action.stop": {
-      "comment": "The label of a button that stops the daemon.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop"
+    "action.stop" : {
+      "comment" : "The label of a button that stops the daemon.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Остановить"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остановить"
           }
         }
       }
     },
-    "AudioNap": {
-      "comment": "The name of the app.",
-      "isCommentAutoGenerated": true,
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AudioNap"
+    "AudioNap" : {
+      "comment" : "The name of the app.",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AudioNap"
           }
         }
       }
     },
-    "device.empty": {
-      "comment": "Shown when blueutil reports no paired devices.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No paired devices"
+    "device.empty" : {
+      "comment" : "Shown when blueutil reports no paired devices.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No paired devices"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нет парных устройств"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет парных устройств"
           }
         }
       }
     },
-    "device.invalidMAC": {
-      "comment": "Hint under the manual address field after invalid input.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not a Bluetooth address"
+    "device.invalidMAC" : {
+      "comment" : "Hint under the manual address field after invalid input.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not a Bluetooth address"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не похоже на адрес Bluetooth"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не похоже на адрес Bluetooth"
           }
         }
       }
     },
-    "device.none": {
-      "comment": "The picker option when no speaker is selected.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not selected"
+    "device.none" : {
+      "comment" : "The picker option when no speaker is selected.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not selected"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не выбрано"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не выбрано"
           }
         }
       }
     },
-    "device.title": {
-      "comment": "The title of the device section in the menu bar window.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Device"
+    "device.title" : {
+      "comment" : "The title of the device section in the menu bar window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Устройство"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство"
           }
         }
       }
     },
-    "error.blueutilNotFound": {
-      "comment": "Shown when the blueutil binary is not installed.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "blueutil is not installed."
+    "error.blueutilNotFound" : {
+      "comment" : "Shown when the blueutil binary is not installed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "blueutil is not installed."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "blueutil не установлен."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "blueutil не установлен."
           }
         }
       }
     },
-    "error.bootoutFailed %lld": {
-      "comment": "Shown when the daemon could not be stopped; the argument is the launchctl exit code.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not stop the daemon (launchctl exited with code %1$lld)."
+    "error.bootoutFailed %lld" : {
+      "comment" : "Shown when the daemon could not be stopped; the argument is the launchctl exit code.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not stop the daemon (launchctl exited with code %1$lld)."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не удалось остановить демон (launchctl завершился с кодом %1$lld)."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось остановить демон (launchctl завершился с кодом %1$lld)."
           }
         }
       }
     },
-    "error.bootstrapFailed %lld": {
-      "comment": "Shown when the daemon could not be started; the argument is the launchctl exit code.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not start the daemon (launchctl exited with code %1$lld)."
+    "error.bootstrapFailed %lld" : {
+      "comment" : "Shown when the daemon could not be started; the argument is the launchctl exit code.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not start the daemon (launchctl exited with code %1$lld)."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не удалось запустить демон (launchctl завершился с кодом %1$lld)."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось запустить демон (launchctl завершился с кодом %1$lld)."
           }
         }
       }
     },
-    "error.connectFailed %lld": {
-      "comment": "Shown when blueutil could not reconnect the device; the argument is the exit code.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not connect the device (blueutil exited with code %1$lld)."
+    "error.connectFailed %lld" : {
+      "comment" : "Shown when blueutil could not reconnect the device; the argument is the exit code.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not connect the device (blueutil exited with code %1$lld)."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не удалось подключить устройство (blueutil завершился с кодом %1$lld)."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подключить устройство (blueutil завершился с кодом %1$lld)."
           }
         }
       }
     },
-    "error.disconnectFailed %lld": {
-      "comment": "Shown when blueutil could not disconnect the device; the argument is the exit code.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not disconnect the device (blueutil exited with code %1$lld)."
+    "error.daemonInstall.bundledMissing" : {
+      "comment" : "Error message when the bundled daemon is missing.",
+      "extractionState" : "manual",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The bundled daemon is missing from the app."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не удалось отключить устройство (blueutil завершился с кодом %1$lld)."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Демон не найден в составе приложения."
           }
         }
       }
     },
-    "error.title": {
-      "comment": "The title of an alert that shows a daemon error.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Daemon control error"
+    "error.daemonInstall.title" : {
+      "comment" : "The title of an alert that appears when the app can't install the daemon.",
+      "extractionState" : "manual",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daemon install error"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ошибка управления демоном"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка установки демона"
           }
         }
       }
     },
-    "log.empty": {
-      "comment": "A message displayed when the daemon log is empty.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No log yet"
+    "error.disconnectFailed %lld" : {
+      "comment" : "Shown when blueutil could not disconnect the device; the argument is the exit code.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not disconnect the device (blueutil exited with code %1$lld)."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Лога пока нет"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось отключить устройство (blueutil завершился с кодом %1$lld)."
           }
         }
       }
     },
-    "log.title": {
-      "comment": "The title of the daemon log section.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Daemon log"
+    "error.title" : {
+      "comment" : "The title of an alert that shows a daemon error.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daemon control error"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Лог демона"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка управления демоном"
           }
         }
       }
     },
-    "settings.idleWindow": {
-      "comment": "The title of the idle window slider.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Idle window"
+    "log.empty" : {
+      "comment" : "A message displayed when the daemon log is empty.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No log yet"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Окно бездействия"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лога пока нет"
           }
         }
       }
     },
-    "settings.ignoreUserActivity": {
-      "comment": "The toggle that makes the daemon count only silence, ignoring user input.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ignore user activity"
+    "log.title" : {
+      "comment" : "The title of the daemon log section.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daemon log"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Игнорировать активность пользователя"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лог демона"
           }
         }
       }
     },
-    "settings.silenceTimeout": {
-      "comment": "The title of the silence timeout slider.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Silence timeout"
+    "settings.idleWindow" : {
+      "comment" : "The title of the idle window slider.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idle window"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Таймаут тишины"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Окно бездействия"
           }
         }
       }
     },
-    "settings.timeoutValue %@ %lld": {
-      "comment": "A slider label: the first argument is the setting's title, the second is its current value in minutes.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@: %2$lld min"
+    "settings.ignoreUserActivity" : {
+      "comment" : "The toggle that makes the daemon count only silence, ignoring user input.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignore user activity"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@: %2$lld мин"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игнорировать активность пользователя"
           }
         }
       }
     },
-    "status.daemon.running": {
-      "comment": "Status row text while the daemon is running.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Daemon running"
+    "settings.silenceTimeout" : {
+      "comment" : "The title of the silence timeout slider.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silence timeout"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Демон запущен"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Таймаут тишины"
           }
         }
       }
     },
-    "status.daemon.starting": {
-      "comment": "Status and button text while the daemon is being started.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starting…"
+    "settings.timeoutValue %@ %lld" : {
+      "comment" : "A slider label: the first argument is the setting's title, the second is its current value in minutes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$lld min"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Запуск…"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$lld мин"
           }
         }
       }
     },
-    "status.daemon.stopped": {
-      "comment": "Status row text while the daemon is stopped.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Daemon stopped"
+    "status.daemon.running" : {
+      "comment" : "Status row text while the daemon is running.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daemon running"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Демон остановлен"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Демон запущен"
           }
         }
       }
     },
-    "status.daemon.stopping": {
-      "comment": "Status and button text while the daemon is being stopped.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stopping…"
+    "status.daemon.starting" : {
+      "comment" : "Status and button text while the daemon is being started.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting…"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Остановка…"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запуск…"
+          }
+        }
+      }
+    },
+    "status.daemon.stopped" : {
+      "comment" : "Status row text while the daemon is stopped.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daemon stopped"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Демон остановлен"
+          }
+        }
+      }
+    },
+    "status.daemon.stopping" : {
+      "comment" : "Status and button text while the daemon is being stopped.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopping…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остановка…"
           }
         }
       }
     }
   },
-  "version": "1.3"
+  "version" : "1.3"
 }
