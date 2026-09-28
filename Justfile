@@ -30,3 +30,7 @@ coverage:
 # Тесты + HTML-отчёт с подсветкой в браузере
 coverage-html:
     ./scripts/coverage.sh --html
+
+# Build a universal Release app and verify arch, signature, and plist keys
+build:
+    ./scripts/build.sh
