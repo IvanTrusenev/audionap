@@ -60,21 +60,9 @@ public enum BlueutilRunner {
         arguments: [String]
     ) -> (output: String, exitCode: Int32)? {
         guard let blueutilPath = BlueutilLocator.resolve() else { return nil }
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: blueutilPath)
-        process.arguments = arguments
-
-        let pipe = Pipe()
-        process.standardOutput = pipe
-
-        do {
-            try process.run()
-        } catch {
+        guard let result = ProcessRunner.run(executable: blueutilPath, arguments: arguments) else {
             return nil
         }
-        process.waitUntilExit()
-
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        return (String(decoding: data, as: UTF8.self), process.terminationStatus)
+        return (result.stdout, result.exitCode)
     }
 }

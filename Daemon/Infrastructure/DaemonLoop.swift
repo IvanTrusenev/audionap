@@ -11,6 +11,18 @@ public final class DaemonLoop {
     private let idleMonitor = IdleMonitor()
     private let bluetooth = BluetoothController()
 
+    /// Consecutive steps where blueutil could not be launched. After the
+    /// threshold the daemon exits so launchd's KeepAlive starts a fresh
+    /// process — a live daemon whose tool calls silently fail leaves the
+    /// speaker unprotected.
+    private var blueutilFailures = 0
+    /// Steps spent waiting for a reconnect, for the periodic "still
+    /// waiting" ping — silence in the log reads as death.
+    private var waitingSteps = 0
+
+    private static let blueutilFailureThreshold = 30    // 5 min at a 10 s poll
+    private static let waitingPingEvery = 60            // 10 min at a 10 s poll
+
     public init(config: AppConfig) {
         self.config = config
     }
@@ -27,11 +39,40 @@ public final class DaemonLoop {
     private func step() {
         guard let mac = config.speakerMAC, !mac.isEmpty else { return }
 
-        // After a disconnect there is no connection — nothing to count, nothing to drop.
-        guard bluetooth.isConnected(to: mac) else {
-            quietSeconds = 0
+        guard let connected = bluetooth.isConnected(to: mac) else {
+            blueutilFailures += 1
+            if blueutilFailures == 1 {
+                DaemonLog.print("blueutil launch failed — counting failures")
+            }
+            if blueutilFailures == Self.blueutilFailureThreshold {
+                // Forensic evidence before the exit: the open-fd count in
+                // the line (high → descriptor leak is back; low → different
+                // cause) and the full lsof table in a snapshot next to the
+                // logs — a dead process can't be autopsied afterwards.
+                let fdCount = (try? FileManager.default.contentsOfDirectory(atPath: "/dev/fd").count) ?? -1
+                DaemonLog.print(
+                    "ERROR: blueutil unreachable for \(Self.blueutilFailureThreshold) steps (open fds: \(fdCount)) — exiting so launchd restarts a fresh process"
+                )
+                if let lsof = ProcessRunner.run(executable: "/usr/sbin/lsof", arguments: ["-p", String(getpid())]) {
+                    try? lsof.stdout.write(
+                        to: Paths.daemonBlindnessURL, atomically: true, encoding: .utf8)
+                }
+                exit(70)
+            }
             return
         }
+        blueutilFailures = 0
+
+        // After a disconnect there is no connection — nothing to count, nothing to drop.
+        guard connected else {
+            quietSeconds = 0
+            waitingSteps += 1
+            if waitingSteps == 1 || waitingSteps.isMultiple(of: Self.waitingPingEvery) {
+                DaemonLog.print("waiting for reconnect (step \(waitingSteps))")
+            }
+            return
+        }
+        waitingSteps = 0
 
         let playing = assertionSource.isPlayingAudio()
         let idleSeconds = Int(idleMonitor.idleSeconds())
@@ -49,12 +90,13 @@ public final class DaemonLoop {
             config: config
         )
 
+        let quietAtDecision = quietSeconds
         if decision.shouldDisconnect {
             try? bluetooth.disconnect(mac)
             quietSeconds = 0
         }
 
-        DaemonLog.print("step: \(decision) quiet=\(quietSeconds)s idle=\(idleSeconds)s")
+        DaemonLog.print("step: \(decision) quiet=\(quietAtDecision)s idle=\(idleSeconds)s")
     }
 
     /// Applies a reloaded config — the watcher calls this on the main queue,

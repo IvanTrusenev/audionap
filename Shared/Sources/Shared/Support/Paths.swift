@@ -49,4 +49,9 @@ public enum Paths {
 
     public static let daemonErrorLogURL: URL =
         logsDirectory.appendingPathComponent("daemon-error.log")
+
+    /// Forensic snapshot written right before the daemon exits on a blueutil
+    /// failure streak — the open-descriptor table of the dying process.
+    public static let daemonBlindnessURL: URL =
+        logsDirectory.appendingPathComponent("daemon-blindness.txt")
 }

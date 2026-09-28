@@ -132,20 +132,10 @@ public final class DaemonController {
     }
 
     nonisolated private static func runLaunchctl(arguments: [String]) -> (output: String, exitCode: Int32) {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
-        process.arguments = arguments
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
-        do {
-            try process.run()
-        } catch {
+        guard let result = ProcessRunner.run(executable: "/bin/launchctl", arguments: arguments) else {
             return ("", -1)
         }
-        process.waitUntilExit()
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        return (String(decoding: data, as: UTF8.self), process.terminationStatus)
+        return (result.stdout + result.stderr, result.exitCode)
     }
 }
 

@@ -5,46 +5,32 @@ import Shared
 public struct BluetoothController {
     public init() {}
 
-    /// true when blueutil reports the device as connected.
-    public func isConnected(to mac: String) -> Bool {
+    /// true/false when blueutil answered; nil when it could not be
+    /// launched — the loop treats repeated nils as tool failure, not as
+    /// "not connected".
+    public func isConnected(to mac: String) -> Bool? {
         let result = runBlueutil(arguments: ["--is-connected", mac])
-        return BlueutilParser.isConnected(output: result.output)
+        return result.map { BlueutilParser.isConnected(output: $0.output) }
     }
 
     /// Drops the connection; throws when blueutil fails.
     public func disconnect(_ mac: String) throws {
-        let result = runBlueutil(arguments: ["--disconnect", mac])
+        guard let result = runBlueutil(arguments: ["--disconnect", mac]) else {
+            throw BlueutilError.notFound
+        }
         guard result.exitCode == 0 else {
-            if result.exitCode == -1 {
-                throw BlueutilError.notFound
-            }
             throw BlueutilError.disconnectFailed(exitCode: result.exitCode)
         }
     }
 
     /// Runs blueutil by its resolved absolute path — launchd's PATH is
-    /// minimal and does not include Homebrew; returns output + exit code.
-    private func runBlueutil(arguments: [String]) -> (output: String, exitCode: Int32) {
-        guard let blueutilPath = BlueutilLocator.resolve() else {
-            return ("", -1)
+    /// minimal and does not include Homebrew; nil when it cannot launch.
+    private func runBlueutil(arguments: [String]) -> (output: String, exitCode: Int32)? {
+        guard let blueutilPath = BlueutilLocator.resolve() else { return nil }
+        guard let result = ProcessRunner.run(executable: blueutilPath, arguments: arguments) else {
+            return nil
         }
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: blueutilPath)
-        process.arguments = arguments
-
-        let pipe = Pipe()
-        process.standardOutput = pipe
-
-        do {
-            try process.run()
-        } catch {
-            return ("", -1)
-        }
-        process.waitUntilExit()
-
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-
-        return (String(decoding: data, as: UTF8.self), process.terminationStatus)
+        return (result.stdout, result.exitCode)
     }
 }
 
