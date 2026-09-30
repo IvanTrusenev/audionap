@@ -55,5 +55,11 @@ silence+idle→disconnect cycle); M3 ✓ menu bar app (status, Start/Stop,
 hot config sliders, log tail). M4 ✓ device picker (blueutil list + manual
 MAC), connect/disconnect toggle, ignoreUserActivity toggle; live e2e
 2026-09-28: silence+idle → disconnect → speaker powered off by its own
-timer. Next: M5 (packaging + release: build script, zips, GitHub release,
-Homebrew tap).
+timer. M5 ✓ packaging + release (2026-10-01): unified version 0.1.0, daemon
+embedded in the app bundle with a self-provisioning installer, app icon,
+universal build.sh and release.sh (dist/ zips + SHA256SUMS), README
+install docs, first GitHub release v0.1.0, and the Homebrew tap
+ivantrusenev/audionap with a cask (style/audit clean; install and the
+Gatekeeper flow verified live). Next: M6 (CI: ci.yml + release.yml),
+after the small tech debt of guarding Start against double-clicks and
+running the first 0.1.1 upgrade cycle.
