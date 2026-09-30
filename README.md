@@ -99,6 +99,9 @@ xcodebuild -project AudioNap.xcodeproj -scheme AudioNap -configuration Release b
 xcodebuild -project AudioNap.xcodeproj -scheme audionapd -configuration Release build
 ```
 
+CI runs the tests and builds on every commit; version tags publish releases
+automatically — see [docs/ci.md](docs/ci.md).
+
 ## Dependencies
 
 - [blueutil](https://github.com/toy/blueutil) (`brew install blueutil`) — Bluetooth connection management

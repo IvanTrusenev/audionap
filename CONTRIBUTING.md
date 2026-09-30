@@ -27,6 +27,12 @@ xcodebuild -project AudioNap.xcodeproj -scheme audionapd build
 
 Conventions live in [STYLE.md](STYLE.md).
 
+## Versioning
+
+Releases follow [Semantic Versioning](https://semver.org/). Before 1.0 the
+relaxed rules apply: the minor version bumps for features (which may change
+behavior), the patch version for fixes only.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
