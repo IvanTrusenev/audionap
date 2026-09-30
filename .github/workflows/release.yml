@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # The tag is v<version>; release.sh takes the bare version and
       # asserts it against AppIdentity, the app bundle, and the daemon CLI.

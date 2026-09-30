@@ -10,7 +10,7 @@ jobs:
     name: Test and build
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Xcode 27 does not expose SPM test targets to test plans without a
       # workspace, so the package tests run through swift test directly.
@@ -20,9 +20,11 @@ jobs:
 
       # The app's own test bundle (DaemonStatusTests) runs via xcodebuild.
       - name: Run app tests
-        run: xcodebuild -project AudioNap.xcodeproj -scheme AudioNap \
-          -destination 'platform=macOS' test
+        run: |
+          xcodebuild -project AudioNap.xcodeproj -scheme AudioNap \
+            -destination 'platform=macOS' test
 
       - name: Build the daemon
-        run: xcodebuild -project AudioNap.xcodeproj -scheme audionapd \
-          -configuration Debug build
+        run: |
+          xcodebuild -project AudioNap.xcodeproj -scheme audionapd \
+            -configuration Debug build
