@@ -4,12 +4,13 @@ Menu bar app for macOS that puts your Bluetooth speaker to sleep when you are aw
 
 Bluetooth speakers suspend their own auto-off timer while a Bluetooth
 connection is active. macOS holds that connection open even in silence, so the
-speaker never sleeps. AudioNap watches for silence (MediaRemote + "Playing audio"
-power assertion) and user inactivity, then drops the Bluetooth connection — and
+speaker never sleeps. AudioNap watches for silence (the "Playing audio" power
+assertion) and user inactivity, then drops the Bluetooth connection — and
 the speaker's own firmware timer does the rest.
 
-> **Status: work in progress.** The app skeleton is in place; the daemon will be
-> ported from a proven prototype. First release is on the way.
+> **Status:** the first release, v0.1.0, is being packaged. The app and the
+> daemon are feature-complete and have been running on the author's machine
+> through the full silence → disconnect → power-off cycle.
 
 ## Components
 
@@ -21,11 +22,57 @@ the speaker's own firmware timer does the rest.
 ## How it works
 
 ```
-every 30 s:
-  playing = MediaRemote now-playing OR "Playing audio" power assertion
+every pollSeconds (default 10 s):
+  playing = "Playing audio" power assertion (held by Chromium-family players)
   idle    = seconds since last user input
   quiet for N minutes + idle → blueutil disconnect
 speaker's own 15-minute timer → powers off
+```
+
+## Install
+
+### Homebrew (recommended)
+
+```bash
+brew tap ivantrusenev/audionap
+brew install --cask audionap
+```
+
+blueutil is installed automatically as a dependency.
+
+### Manual
+
+1. Download `AudioNap-<version>.zip` from the latest GitHub release and unpack
+   `AudioNap.app` into `/Applications`.
+2. Install blueutil: `brew install blueutil`.
+
+Power users: `audionapd-<version>.zip` is the standalone daemon for launchd
+setups without the app.
+
+### First launch (Gatekeeper)
+
+AudioNap is ad-hoc signed and not notarized, so macOS blocks the first launch
+("cannot verify the developer"). To allow it:
+
+1. Open the app once, then dismiss the dialog.
+2. Open **System Settings → Privacy & Security**, scroll to **Security**, and
+   click **Open Anyway** next to AudioNap.
+
+Repeat after every update — each ad-hoc signature is new, and macOS 15 and
+later no longer offer the right-click override.
+
+## Uninstall
+
+```bash
+brew uninstall --zap audionap
+```
+
+The zap removes the app, the daemon, its launch agent, configuration, and
+logs. Manual removal:
+
+```bash
+launchctl bootout gui/$(id -u)/online.threealab.audionap.daemon
+rm -rf ~/Library/Application\ Support/AudioNap ~/Library/Logs/AudioNap
 ```
 
 ## Build
@@ -36,6 +83,13 @@ Requirements: macOS 14+, Xcode 27+.
 git clone https://github.com/IvanTrusenev/audionap.git
 cd audionap
 open AudioNap.xcodeproj
+```
+
+Release build and packaging from the command line:
+
+```bash
+just build            # universal Release app with verification gates
+just release 0.1.0    # dist/: AudioNap-0.1.0.zip, audionapd-0.1.0.zip, SHA256SUMS.txt
 ```
 
 or
