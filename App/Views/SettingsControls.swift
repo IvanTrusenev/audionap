@@ -5,6 +5,13 @@ import SwiftUI
 /// the daemon hot-reloads the config file (debounced by its ConfigWatcher).
 struct SettingsControls: View {
     let store: ConfigStore
+    let autostart: AutostartController
+
+    /// Autostart state comes from the filesystem, not memory: the toggle
+    /// survives app restarts and stays honest if the file was touched.
+    @State private var launchAtLogin = false
+    @State private var autostartErrorMessage = ""
+    @State private var showingAutostartError = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -24,14 +31,61 @@ struct SettingsControls: View {
                 ),
                 range: AppConfig.inputWindowRange
             )
-            Toggle(
-                "settings.ignoreUserActivity",
+            toggleRow(
+                title: "settings.ignoreUserActivity",
                 isOn: Binding(
                     get: { store.ignoreUserActivity },
                     set: { store.ignoreUserActivity = $0 }
                 )
             )
+            toggleRow(
+                title: "settings.launchAtLogin",
+                isOn: Binding(
+                    get: { launchAtLogin },
+                    set: { newValue in
+                        launchAtLogin = newValue
+                        Task {
+                            do {
+                                try await autostart.setEnabled(newValue)
+                            } catch {
+                                // The filesystem is the truth: re-read it
+                                // so the toggle snaps back honestly.
+                                launchAtLogin = AutostartController.isEnabled()
+                                autostartErrorMessage = error.localizedDescription
+                                showingAutostartError = true
+                            }
+                        }
+                    }
+                )
+            )
         }
+        .onAppear {
+            launchAtLogin = AutostartController.isEnabled()
+        }
+        .alert("error.autostart.title", isPresented: $showingAutostartError) {
+            Button("action.ok") {}
+        } message: {
+            Text(autostartErrorMessage)
+        }
+    }
+
+    /// A settings row: the switch pinned right. A plain Toggle would sit
+    /// the control right after the label text, so the label owns the
+    /// stretch instead — the Spacer inside it takes the free width and
+    /// the switch lands on the trailing edge. `controlSize(.mini)`
+    /// matches the compact switches in System Settings; the macOS pill
+    /// renders large by default.
+    private func toggleRow(
+        title: LocalizedStringKey, isOn: Binding<Bool>
+    ) -> some View {
+        Toggle(isOn: isOn) {
+            HStack {
+                Text(title)
+                Spacer()
+            }
+        }
+        .toggleStyle(.switch)
+        .controlSize(.mini)
     }
 
     /// Labeled slider. Slider only binds BinaryFloatingPoint values, so the

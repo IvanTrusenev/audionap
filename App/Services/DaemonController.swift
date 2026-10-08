@@ -123,7 +123,9 @@ public final class DaemonController {
     }
 
     /// Writes the canonical launch agent plist into Application Support.
-    nonisolated private static func writeLaunchAgentPlist() throws {
+    /// Also used by `AutostartController` to refresh the canonical copy
+    /// before installing the LaunchAgents one.
+    nonisolated static func writeLaunchAgentPlist() throws {
         let daemonURL = Paths.daemonURL
         let spec = LaunchAgentSpec(
             label: label,

@@ -18,6 +18,9 @@ struct ContentView: View {
     /// Provisions the bundled daemon on first window open.
     @State private var installer = DaemonInstaller()
 
+    /// Manages the LaunchAgents copy that enables launch-at-login.
+    @State private var autostart = AutostartController()
+
     /// Install failures surface in an alert (same pattern as ControlRow).
     @State private var installErrorMessage = ""
 
@@ -29,7 +32,7 @@ struct ContentView: View {
             Divider()
             DeviceSection(store: store)
             Divider()
-            SettingsControls(store: store)
+            SettingsControls(store: store, autostart: autostart)
             #if DEBUG
             Divider()
             LogSection(reader: logReader)

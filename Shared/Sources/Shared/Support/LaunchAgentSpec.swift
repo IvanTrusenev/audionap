@@ -29,6 +29,7 @@ public struct LaunchAgentSpec: Equatable, Sendable {
             "Label": label,
             "ProgramArguments": [programPath],
             "KeepAlive": true,
+            "RunAtLoad": true,
             "StandardOutPath": standardOutPath,
             "StandardErrorPath": standardErrorPath,
         ]

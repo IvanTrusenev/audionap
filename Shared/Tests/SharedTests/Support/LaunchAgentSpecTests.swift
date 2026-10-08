@@ -27,6 +27,10 @@ struct LaunchAgentSpecTests {
         #expect(spec.plist["KeepAlive"] as? Bool == true)
     }
 
+    @Test func plistEnablesRunAtLoad() {
+        #expect(spec.plist["RunAtLoad"] as? Bool == true)
+    }
+
     @Test func plistHasStandardOutPath() {
         #expect(spec.plist["StandardOutPath"] as? String == "/tmp/daemon.log")
     }
@@ -44,6 +48,7 @@ struct LaunchAgentSpecTests {
         #expect(decoded?["Label"] as? String == spec.label)
         #expect(decoded?["ProgramArguments"] as? [String] == [spec.programPath])
         #expect(decoded?["KeepAlive"] as? Bool == true)
+        #expect(decoded?["RunAtLoad"] as? Bool == true)
         #expect(decoded?["StandardOutPath"] as? String == spec.standardOutPath)
         #expect(decoded?["StandardErrorPath"] as? String == spec.standardErrorPath)
     }

@@ -283,6 +283,24 @@
         }
       }
     },
+    "error.autostart.title" : {
+      "comment" : "The title of an alert that appears when the app can't update the launch-at-login plist.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autostart error"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка автозапуска"
+          }
+        }
+      }
+    },
     "error.daemonInstall.bundledMissing" : {
       "comment" : "Error message when the bundled daemon is missing.",
       "extractionState" : "manual",
@@ -425,6 +443,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Игнорировать активность пользователя"
+          }
+        }
+      }
+    },
+    "settings.launchAtLogin" : {
+      "comment" : "The toggle that makes launchd start the daemon at login.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch at login"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запускать при входе в систему"
           }
         }
       }
