@@ -60,6 +60,22 @@ embedded in the app bundle with a self-provisioning installer, app icon,
 universal build.sh and release.sh (dist/ zips + SHA256SUMS), README
 install docs, first GitHub release v0.1.0, and the Homebrew tap
 ivantrusenev/audionap with a cask (style/audit clean; install and the
-Gatekeeper flow verified live). Next: M6 (CI: ci.yml + release.yml),
-after the small tech debt of guarding Start against double-clicks and
-running the first 0.1.1 upgrade cycle.
+Gatekeeper flow verified live). M6 ✓ CI (2026-10-01): ci.yml runs the
+Shared package tests via swift test, the app test bundle and the daemon
+build via xcodebuild on every push/PR; release.yml runs release.sh on v*
+tags and drafts a GitHub release for a human to publish (docs/ci.md);
+CI is green on main. M7 ✓ autostart (2026-10-09): RunAtLoad in the
+launch agent spec, an AutostartController managing a copy of the
+canonical plist in ~/Library/LaunchAgents/ (presence = autostart on,
+no launchctl calls), a launch-at-login toggle in settings (default OFF,
+state read from the filesystem); verified live: ON → the copy matches
+the canonical plist, the toggle survives app restarts, after
+logout/login launchd starts the daemon by itself (state running), and
+the off-path works too (OFF → the copy is removed → next login: no
+record, the daemon does not start; a manually removed copy shows OFF
+in the toggle). The Start double-click bug is still open: the
+0.1.0 toggle already disables with a spinner while transitioning, but
+start()/stop() have no transition guard themselves, so two rapid clicks
+still start parallel bootout/bootstrap cycles. Next: the start/stop
+guard fix, then v0.2.0 (feature → minor) — the first release built by
+release.yml, with the brew upgrade + zap cycle.
