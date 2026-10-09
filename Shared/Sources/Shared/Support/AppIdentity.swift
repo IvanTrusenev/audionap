@@ -14,5 +14,5 @@ public enum AppIdentity {
     /// Product version in lockstep with MARKETING_VERSION of the app target.
     /// scripts/release.sh asserts all three (app plist, daemon --version,
     /// this constant) match before packaging.
-    public static let version = "0.1.0"
+    public static let version = "0.2.0"
 }
