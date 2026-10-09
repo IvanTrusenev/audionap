@@ -93,6 +93,11 @@ sleeps in 1s slices so SIGTERM is noticed within a second instead of
 losing the race to launchd's exit-timeout SIGKILL — the daemon now
 exits cleanly and logs "stopped cleanly" — and LaunchctlParser treats
 the spawn window (state = xpcproxy) as running, so the button no
-longer flashes "stopped" right after a successful start. Next: v0.2.0
-(feature → minor) — the first release built by release.yml, with the
-brew upgrade + zap cycle.
+longer flashes "stopped" right after a successful start. v0.2.0 ✓
+released (2026-10-10): the first release built by release.yml (tag →
+universal build via release.sh → draft → human publish), the cask
+bumped to 0.2.0 (style/audit clean), and the live brew upgrade
+verified end to end (app 0.2.0, the daemon reinstalled via the
+version marker and running, Stop/Start quick and clean). Left for a
+convenient moment: the uninstall --zap cycle (with a config backup)
+and the manual zip path.
