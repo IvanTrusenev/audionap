@@ -8,6 +8,10 @@ struct LaunchctlParserTests {
         #expect(LaunchctlParser.isRunning(output: "state = running\n") == true)
     }
 
+    @Test func spawnWindowIsDetected() {
+        #expect(LaunchctlParser.isRunning(output: "state = xpcproxy\n") == true)
+    }
+
     @Test func notFoundServiceReturnsFalse() {
         #expect(
             LaunchctlParser.isRunning(
