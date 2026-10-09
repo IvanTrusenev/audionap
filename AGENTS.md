@@ -46,6 +46,18 @@ user inactivity, letting the speaker's own power-off timer finish the job.
 - Package tests run via `swift test` in `Shared/` (Xcode 27 does not expose SPM
   test targets in test plans without a workspace; verified 2026-09-26).
 
+## Debugging
+
+Live debugging is instrumented: the agent prepares the scenario and places
+tracing points itself — the owner runs the scenario, the agent reads the full
+picture from the logs. If the agent has to ask what the owner sees, the
+instrumentation is missing. Tracing goes through `DevLog`
+(`App/Services/DevLog.swift`): set `devLogSignature` per session (version it
+per fix iteration), emit points with `DevLog.log(name, message)`, collect
+with `log stream --predicate 'subsystem == "online.threealab.audionap" AND
+category == "<signature>"'` (via `/usr/bin/log` — zsh's built-in `log`
+conflicts). Reset the signature to `""` and remove the points afterwards.
+
 ## Progress
 
 M0 ✓ research; M1 ✓ skeleton (App/Daemon/Tests folders, shared schemes, public
