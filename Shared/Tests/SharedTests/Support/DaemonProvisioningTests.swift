@@ -9,7 +9,9 @@ struct DaemonProvisioningTests {
     }
 
     @Test func matchingVersionIsCurrent() {
-        #expect(!DaemonProvisioning.needsInstall(installedVersion: "0.1.0"))
+        // Compare against the shared constant, not a hardcoded literal —
+        // a version bump must not break the test.
+        #expect(!DaemonProvisioning.needsInstall(installedVersion: AppIdentity.version))
     }
 
     @Test func olderMarkerNeedsInstall() {
