@@ -28,11 +28,19 @@ public final class DaemonLoop {
     }
 
     public func run() {
+        var lastStep = Date.distantPast
         while !Self.stop {
-            step()
-            // C API imports without labels; pumps the main queue where
-            // system callbacks are delivered, sleeping for pollSeconds.
-            CFRunLoopRunInMode(.defaultMode, Double(config.pollSeconds), false)
+            if Date().timeIntervalSince(lastStep) >= Double(config.pollSeconds) {
+                step()
+                lastStep = Date()
+            }
+            // Sleep in short slices: SIGTERM only sets `stop` from the
+            // signal context — it does not wake the run loop, and a full
+            // pollSeconds sleep (10s) lost the race to launchd's 5s
+            // exit-timeout, which SIGKILLed the daemon before it ever
+            // checked the flag. A 1s slice notices the signal in time
+            // and still pumps the main queue where callbacks land.
+            CFRunLoopRunInMode(.defaultMode, 1, false)
         }
     }
 

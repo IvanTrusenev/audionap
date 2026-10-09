@@ -53,5 +53,8 @@ struct AudioNapDaemon: ParsableCommand {
         }
 
         loop.run()
+        // A marker in the log that the daemon exited on its own — a
+        // SIGKILL from launchd's exit-timeout leaves no such line.
+        DaemonLog.print("stopped cleanly")
     }
 }
