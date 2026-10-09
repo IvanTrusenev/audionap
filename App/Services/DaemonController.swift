@@ -43,6 +43,10 @@ public final class DaemonController {
     /// blocking launchctl sequence runs off the main actor, so the UI
     /// stays responsive and shows `transitioning` meanwhile.
     public func start() async throws {
+        // Double-click protection: the UI's disabled state propagates
+        // asynchronously, so only this synchronous guard can stop a
+        // second click from racing its own bootout/bootstrap cycle.
+        guard !status.isTransitioning else { return }
         status = DaemonStatus.next(from: status, event: .operationStarted)
         do {
             try await Task.detached(priority: .userInitiated) {
@@ -57,6 +61,8 @@ public final class DaemonController {
 
     /// Stop: bootout the agent.
     public func stop() async throws {
+        // Same double-click protection as start().
+        guard !status.isTransitioning else { return }
         status = DaemonStatus.next(from: status, event: .operationStarted)
         do {
             try await Task.detached(priority: .userInitiated) {
@@ -93,28 +99,30 @@ public final class DaemonController {
         _ = runLaunchctl(arguments: ["bootout", "\(domain)/\(label)"])
         let exitCode = bootstrapWithRetry()
         if exitCode != 0 {
-            // A retry can land on the far side of the race: bootstrap may
-            // have failed while the job actually loaded. Trust launchd.
-            let output = runLaunchctl(arguments: ["print", "\(domain)/\(label)"]).output
-            if !LaunchctlParser.isRunning(output: output) {
-                throw DaemonControlError.bootstrapFailed(exitCode: exitCode)
-            }
+            throw DaemonControlError.bootstrapFailed(exitCode: exitCode)
         }
     }
 
     /// bootout removes the service from the domain asynchronously, so a
     /// bootstrap issued right after can hit the half-removed record and
     /// fail with exit code 5. Retry until `deadline` — launchd's exit
-    /// timeout (5s for this job) bounds the teardown — and report the
-    /// last exit code.
+    /// timeout (5s for this job) bounds the teardown, plus margin — and
+    /// report the last exit code. A retry can land on the far side of
+    /// the race (bootstrap failed, but the job actually loaded), so a
+    /// failed attempt also checks whether the job is running regardless:
+    /// trust launchd per attempt, not just at the end.
     nonisolated private static func bootstrapWithRetry() -> Int32 {
-        let deadline = Date().addingTimeInterval(5)
+        let deadline = Date().addingTimeInterval(7)
         var exitCode: Int32 = -1
         repeat {
             exitCode = runLaunchctl(arguments: [
                 "bootstrap", domain, Paths.launchAgentTemplateURL.path,
             ]).exitCode
             if exitCode == 0 {
+                return 0
+            }
+            let output = runLaunchctl(arguments: ["print", "\(domain)/\(label)"]).output
+            if LaunchctlParser.isRunning(output: output) {
                 return 0
             }
             Thread.sleep(forTimeInterval: 0.25)
