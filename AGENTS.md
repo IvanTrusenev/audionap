@@ -73,9 +73,14 @@ the canonical plist, the toggle survives app restarts, after
 logout/login launchd starts the daemon by itself (state running), and
 the off-path works too (OFF → the copy is removed → next login: no
 record, the daemon does not start; a manually removed copy shows OFF
-in the toggle). The Start double-click bug is still open: the
-0.1.0 toggle already disables with a spinner while transitioning, but
-start()/stop() have no transition guard themselves, so two rapid clicks
-still start parallel bootout/bootstrap cycles. Next: the start/stop
-guard fix, then v0.2.0 (feature → minor) — the first release built by
-release.yml, with the brew upgrade + zap cycle.
+in the toggle). Launchd hardening (2026-10-09/10, verified live with
+unified-log instrumentation): start()/stop() carry a transition guard
+against double-clicks, the bootstrap retry trusts launchd per attempt
+with a 7s deadline (covers launchd's 5s exit-timeout), the daemon loop
+sleeps in 1s slices so SIGTERM is noticed within a second instead of
+losing the race to launchd's exit-timeout SIGKILL — the daemon now
+exits cleanly and logs "stopped cleanly" — and LaunchctlParser treats
+the spawn window (state = xpcproxy) as running, so the button no
+longer flashes "stopped" right after a successful start. Next: v0.2.0
+(feature → minor) — the first release built by release.yml, with the
+brew upgrade + zap cycle.
