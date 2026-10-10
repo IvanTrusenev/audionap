@@ -38,7 +38,7 @@ user inactivity, letting the speaker's own power-off timer finish the job.
   `AppTheme` injected through the environment; views reference meanings
   (`statusActive`), never raw hues, and generated asset symbols keep the
   references compile-time checked.
-- App Info.plists live in `Config/` (per-configuration split): both carry
+- App Info.plists live in `InfoPlists/` (per-configuration split): both carry
   `NSBluetoothAlwaysUsageDescription` (blueutil aborts under the TCC gate
   without it), release also carries `LSMultipleInstancesProhibited` (debug
   keeps it off so preview hosts can't block the Run loop).
