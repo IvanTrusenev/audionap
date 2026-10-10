@@ -6,16 +6,26 @@ import Foundation
 /// radix-2 FFT, bin magnitudes group into 10 log-spaced bands, and the
 /// bands normalize against their maximum so the UI reads 0…1.
 public enum AudioBands {
-    public static let bandCount = 10
+    /// 16 log-spaced bands: the most the 23.4 Hz FFT bins support —
+    /// every band spans at least one full bin, so no bar reads a
+    /// neighbour's frequency (31 bands needed bin sharing at the
+    /// bottom). Still well within the visualizer canon (8–20).
+    public static let bandCount = 16
     /// Floats per frame: the DSPSplitComplex variant of vDSP.FFT treats
     /// log2n as the log2 of the REAL sample count and produces N/2
     /// packed bins, so 4096 samples (log2n = 12) give ~23.4 Hz bins at
     /// 48 kHz.
     public static let frameSize = 4096
 
-    /// Band edges in Hz: 11 edges delimit 10 bands from 60 Hz to 20 kHz.
-    public static let bandEdges: [Double] =
-        [60, 120, 250, 500, 1_000, 2_000, 4_000, 8_000, 12_000, 16_000, 20_000]
+    /// Band edges in Hz: 17 edges delimit 16 log-spaced bands from
+    /// 60 Hz to 20 kHz.
+    public static let bandEdges: [Double] = {
+        let low = 60.0
+        let high = 20_000.0
+        return (0...bandCount).map { index in
+            low * pow(high / low, Double(index) / Double(bandCount))
+        }
+    }()
 
     /// Precomputed twiddle factors; shared across calls from a single
     /// capture queue — `nonisolated(unsafe)` is the same pattern as
@@ -24,9 +34,19 @@ public enum AudioBands {
         log2n: vDSP_Length(12), radix: .radix2, ofType: DSPSplitComplex.self)!
 
     /// Computes the normalized band levels of one mono frame. Returns
-    /// zeros for a frame of the wrong size.
+    /// zeros for a frame of the wrong size or quieter than the playing
+    /// threshold — normalization would otherwise inflate a noise floor
+    /// (fade-outs, dither, between-track tails) to full height.
     public static func compute(frame: [Float], sampleRate: Double) -> [Double] {
         guard frame.count == frameSize, sampleRate > 0 else {
+            return Array(repeating: 0, count: bandCount)
+        }
+
+        // The RMS gate: the same threshold the playing decision uses.
+        var sum = 0.0
+        for sample in frame { sum += Double(sample * sample) }
+        let rms = (sum / Double(frameSize)).squareRoot()
+        guard rms > ActivityWindow.defaultThreshold else {
             return Array(repeating: 0, count: bandCount)
         }
 
@@ -57,11 +77,17 @@ public enum AudioBands {
         // Group bins into log-spaced bands (average magnitude per band).
         // The packed output holds frameSize/2 bins, so the bin width is
         // sampleRate / (frameSize/2) — not sampleRate / frameSize.
+        // A bin belongs to a band when the bin's CENTER falls inside
+        // the band, hence ceil on both edges. The bottom bands are
+        // narrower than one bin (23.4 Hz at 48 kHz), so each band gets
+        // at least one bin — neighbours may share a bin down there,
+        // but no bar stays dead.
         let binHz = sampleRate / Double(frameSize / 2)
         var bands = [Double](repeating: 0, count: bandCount)
         for band in 0..<bandCount {
-            let lowBin = max(0, Int(bandEdges[band] / binHz))
-            let highBin = min(frameSize / 2, Int(bandEdges[band + 1] / binHz))
+            let lowBin = max(0, Int((bandEdges[band] / binHz).rounded(.up)))
+            let edgeBin = min(frameSize / 2, Int((bandEdges[band + 1] / binHz).rounded(.up)))
+            let highBin = max(lowBin + 1, edgeBin)
             guard highBin > lowBin else { continue }
             let sum = magnitudes[lowBin..<highBin].reduce(0, +)
             bands[band] = sum / Double(highBin - lowBin)

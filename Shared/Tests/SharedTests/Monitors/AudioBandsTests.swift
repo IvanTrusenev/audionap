@@ -5,8 +5,9 @@ import Testing
 
 struct AudioBandsTests {
 
-    /// A 440 Hz sine at full scale: its energy must land in the
-    /// 250–500 Hz band (band index 2) and nowhere else.
+    /// A 440 Hz sine at full scale: its energy must land in the band
+    /// covering 440 Hz (band 5 of the 16 log-spaced bands) and
+    /// nowhere else.
     @Test func sine440LandsInItsBand() {
         let sampleRate = 48_000.0
         var frame = [Float](repeating: 0, count: AudioBands.frameSize)
@@ -16,14 +17,13 @@ struct AudioBandsTests {
         let bands = AudioBands.compute(frame: frame, sampleRate: sampleRate)
 
         #expect(bands.count == AudioBands.bandCount)
-        #expect(bands[2] > 0.9)
+        #expect(bands[5] > 0.9)
         // Normalized: the loudest band is 1.0.
         #expect(abs(bands.max()! - 1.0) < 0.001)
-        // Neighbouring bands are far quieter; the upper neighbour may
-        // catch the Hann main lobe's tail on the boundary bin, hence
-        // the looser bound there.
-        #expect(bands[1] < 0.1)
-        #expect(bands[3] < 0.3)
+        // Neighbouring bands are far quieter; the Hann main lobe
+        // spills into the direct neighbours, hence the bounds.
+        #expect(bands[4] < 0.4)
+        #expect(bands[6] < 0.4)
     }
 
     @Test func silenceYieldsZeroBands() {
@@ -32,9 +32,35 @@ struct AudioBandsTests {
         #expect(bands.allSatisfy { $0 == 0 })
     }
 
+    /// A barely-audible frame (RMS well below the playing threshold)
+    /// must also read as silence: normalization against the loudest
+    /// band would otherwise inflate the noise floor to full height —
+    /// the "twitching between tracks" artifact.
+    @Test func noiseFloorYieldsZeroBands() {
+        let sampleRate = 48_000.0
+        var frame = [Float](repeating: 0, count: AudioBands.frameSize)
+        for i in 0..<AudioBands.frameSize {
+            frame[i] = Float(sin(2 * .pi * 440 * Double(i) / sampleRate)) * 0.001
+        }
+        let bands = AudioBands.compute(frame: frame, sampleRate: sampleRate)
+        #expect(bands.allSatisfy { $0 == 0 })
+    }
+
     @Test func wrongFrameSizeYieldsZeros() {
         let bands = AudioBands.compute(frame: [0, 1, 2], sampleRate: 48_000)
         #expect(bands.allSatisfy { $0 == 0 })
+    }
+
+    /// White noise spreads energy evenly: every band must read
+    /// nonzero — a dead band would mean its bin mapping is off.
+    @Test func whiteNoiseLightsEveryBand() {
+        var generator = SystemRandomNumberGenerator()
+        var frame = [Float](repeating: 0, count: AudioBands.frameSize)
+        for i in 0..<AudioBands.frameSize {
+            frame[i] = Float.random(in: -1...1, using: &generator)
+        }
+        let bands = AudioBands.compute(frame: frame, sampleRate: 48_000)
+        #expect(bands.allSatisfy { $0 > 0 })
     }
 
     @Test func liveStateRoundtripsThroughThePlist() throws {
