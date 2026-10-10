@@ -26,6 +26,13 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
     private var monoFrame = [Float]()
     /// Latest normalized band levels, 0…1.
     private var bands = [Double](repeating: 0, count: AudioBands.bandCount)
+    /// Timestamp of the last delivered buffer — the stall detector.
+    /// ScreenCaptureKit freezes on screen lock and does not always
+    /// resume after unlock, so a silent stream must not be trusted.
+    private var lastBufferAt: TimeInterval = 0
+    /// Throttle for restart attempts — the permission-missing case
+    /// must not spam the TCC machinery.
+    private var lastRestartAttemptAt: TimeInterval = 0
 
     private(set) var isRunning = false
     /// Human-readable reason why the capture is not running, if any.
@@ -77,18 +84,57 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
 
     /// Whether the window reads as playing; nil while the capture is
     /// not running — the caller then falls back to legacy signals.
+    /// A stream that stopped delivering buffers reads as stalled and
+    /// disables the capture: the window ages out into silence, and a
+    /// frozen silence must never pass as "not playing".
     public func isPlaying() -> Bool? {
         lock.lock()
         defer { lock.unlock() }
         guard isRunning else { return nil }
-        return window.isPlaying(at: Date().timeIntervalSinceReferenceDate)
+        let now = Date().timeIntervalSinceReferenceDate
+        if lastBufferAt > 0,
+           now - lastBufferAt > ActivityWindow.defaultWindowDuration {
+            isRunning = false
+            lastError = "capture stalled — legacy signals"
+            DaemonLog.print("audio capture: stalled — legacy signals")
+            return nil
+        }
+        return window.isPlaying(at: now)
+    }
+
+    /// Restarts the capture after a stall or failure — the loop calls
+    /// it while the monitor is down, throttled to one attempt per
+    /// 10 seconds.
+    public func restart() async {
+        guard shouldAttemptRestart() else { return }
+        await stop()
+        try? await start()
+    }
+
+    /// The throttling check, kept synchronous — NSLock must not be
+    /// held across an await.
+    private func shouldAttemptRestart() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        let now = Date().timeIntervalSinceReferenceDate
+        guard now - lastRestartAttemptAt >= 10 else { return false }
+        lastRestartAttemptAt = now
+        return true
+    }
+
+    /// Whether the capture is up, for the loop's restart checks.
+    public var captureRunning: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return isRunning
     }
 
     /// The latest equalizer bands, 0…1 (zeros while the capture is
-    /// down or silent).
+    /// down, stalled, or silent).
     public func snapshotBands() -> [Double] {
         lock.lock()
         defer { lock.unlock() }
+        guard isRunning else { return [Double](repeating: 0, count: AudioBands.bandCount) }
         return bands
     }
 
@@ -152,6 +198,7 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
         window.mark(
             active: rms > ActivityWindow.defaultThreshold,
             at: Date().timeIntervalSinceReferenceDate)
+        lastBufferAt = Date().timeIntervalSinceReferenceDate
     }
 }
 

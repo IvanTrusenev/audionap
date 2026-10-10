@@ -59,15 +59,20 @@ struct AudioNapDaemon: ParsableCommand {
             }
         }
 
+        let speakerGate = SpeakerOutputMonitor()
         let loop = DaemonLoop(
             config: AppConfig.load(from: Paths.configURL),
-            systemAudio: systemAudio)
+            systemAudio: systemAudio,
+            speakerGate: speakerGate)
         let watcher = ConfigWatcher()
         watcher.start { newConfig in
             loop.update(config: newConfig)
         }
 
-        let publisher = StatePublisher(monitor: systemAudio)
+        let publisher = StatePublisher(
+            monitor: systemAudio,
+            speakerGate: speakerGate,
+            macProvider: { loop.speakerMAC })
         publisher.start()
 
         loop.run()

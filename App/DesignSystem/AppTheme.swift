@@ -13,6 +13,27 @@ public struct AppTheme: Sendable {
     /// The neutral color of the daemon controls while an operation
     /// is in flight.
     public var statusTransitioning: Color
+    /// The equalizer's cold end — the green the bars start from.
+    /// A dedicated token, not `statusActive`: "daemon alive" and "low
+    /// audio level" are different meanings that happen to share a hue
+    /// today; either palette may change independently later.
+    public var equalizerCold: Color
+    /// The equalizer's middle stop — the VU-meter amber.
+    public var equalizerAmber: Color
+    /// The equalizer's hot end — the red the bars grow toward.
+    public var equalizerHot: Color
+
+    /// The equalizer's fixed background: the strip's full height is
+    /// painted in the broadcast VU-meter scale — green (bottom), amber
+    /// (middle), red (top) — and each bar's height is a mask revealing
+    /// the bottom of it. The gradient must never be stretched to a
+    /// bar's own bounds.
+    public var equalizerBar: LinearGradient {
+        LinearGradient(
+            colors: [equalizerCold, equalizerAmber, equalizerHot],
+            startPoint: .bottom,
+            endPoint: .top)
+    }
 
     /// The app's default theme, injected once at the root. The asset
     /// symbols are compile-time checked — a renamed Color Set breaks the
@@ -20,7 +41,10 @@ public struct AppTheme: Sendable {
     public static let standard = AppTheme(
         statusActive: Color(.statusActive),
         statusInactive: Color(.statusInactive),
-        statusTransitioning: Color(.statusTransitioning)
+        statusTransitioning: Color(.statusTransitioning),
+        equalizerCold: Color(.equalizerCold),
+        equalizerAmber: Color(.equalizerAmber),
+        equalizerHot: Color(.equalizerHot)
     )
 }
 

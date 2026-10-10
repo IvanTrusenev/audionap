@@ -14,7 +14,11 @@ public final class DaemonLoop {
     /// running — the step falls back to the legacy assertion signal.
     private let systemAudio: SystemAudioMonitor
     /// Per-device gate: whether the speaker is the output target.
-    private let speakerGate = SpeakerOutputMonitor()
+    private let speakerGate: SpeakerOutputMonitor
+
+    /// The currently configured speaker MAC, for the state publisher's
+    /// band gating.
+    var speakerMAC: String? { config.speakerMAC }
 
     /// Consecutive steps where blueutil could not be launched. After the
     /// threshold the daemon exits so launchd's KeepAlive starts a fresh
@@ -28,9 +32,14 @@ public final class DaemonLoop {
     private static let blueutilFailureThreshold = 30  // 5 min at a 10 s poll
     private static let waitingPingEvery = 60  // 10 min at a 10 s poll
 
-    public init(config: AppConfig, systemAudio: SystemAudioMonitor) {
+    public init(
+        config: AppConfig,
+        systemAudio: SystemAudioMonitor,
+        speakerGate: SpeakerOutputMonitor
+    ) {
         self.config = config
         self.systemAudio = systemAudio
+        self.speakerGate = speakerGate
     }
 
     public func run() {
@@ -39,6 +48,12 @@ public final class DaemonLoop {
             if Date().timeIntervalSince(lastStep) >= Double(config.pollSeconds) {
                 step()
                 lastStep = Date()
+            }
+            // The capture may be down (permission, stall after a
+            // screen lock) — retry it so the universal signal recovers
+            // without user action; the monitor throttles the attempts.
+            if !systemAudio.captureRunning {
+                Task { await systemAudio.restart() }
             }
             // Sleep in short slices: SIGTERM only sets `stop` from the
             // signal context — it does not wake the run loop, and a full
@@ -90,9 +105,9 @@ public final class DaemonLoop {
 
         // The universal signal wins while its capture runs; the legacy
         // assertion (which folds in the MediaRemote rate) is the fallback.
-        // The gate is best-effort: an unobservable speaker reads as "on"
-        // so the universal signal alone decides rather than blocking
-        // disconnects on a blind gate.
+        // The gate is best-effort: it reads open only without a
+        // configured speaker — a speaker whose CoreAudio device is
+        // gone reads closed (no device, no audio).
         let playing =
             systemAudio.isPlaying().map { fractionPlaying in
                 (speakerGate.isRunning(mac: config.speakerMAC) ?? true)

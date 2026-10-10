@@ -10,11 +10,20 @@ import Shared
 /// contract.
 public final class StatePublisher {
     private let monitor: SystemAudioMonitor
+    private let speakerGate: SpeakerOutputMonitor
+    /// The current speaker MAC — the loop owns the hot-reloaded config.
+    private let macProvider: () -> String?
     private var timer: CFRunLoopTimer?
     private var failureLogged = false
 
-    public init(monitor: SystemAudioMonitor) {
+    public init(
+        monitor: SystemAudioMonitor,
+        speakerGate: SpeakerOutputMonitor,
+        macProvider: @escaping () -> String?
+    ) {
         self.monitor = monitor
+        self.speakerGate = speakerGate
+        self.macProvider = macProvider
     }
 
     /// Installs the timer on the current run loop (the daemon main).
@@ -23,7 +32,7 @@ public final class StatePublisher {
         var context = CFRunLoopTimerContext()
         context.info = Unmanaged.passUnretained(self).toOpaque()
         let timer = CFRunLoopTimerCreate(
-            nil, CFAbsoluteTimeGetCurrent() + 0.25, 0.25, 0, 0,
+            nil, CFAbsoluteTimeGetCurrent() + 0.1, 0.1, 0, 0,
             { _, info in
                 guard let info else { return }
                 let publisher = Unmanaged<StatePublisher>
@@ -42,8 +51,15 @@ public final class StatePublisher {
     }
 
     private func publish() {
+        // The bands reflect the SPEAKER, not the whole mix: when the
+        // output targets another device — or the speaker's CoreAudio
+        // device is gone (powered off) — the equalizer dies. The gate
+        // reads open only without a configured speaker.
+        let gated = (speakerGate.isRunning(mac: macProvider()) ?? true)
+            ? monitor.snapshotBands()
+            : [Double](repeating: 0, count: AudioBands.bandCount)
         let state = LiveState(
-            bands: monitor.snapshotBands(),
+            bands: gated,
             updatedAt: Date())
         let encoder = PropertyListEncoder()
         encoder.outputFormat = .binary

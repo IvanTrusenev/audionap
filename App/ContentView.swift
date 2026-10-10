@@ -21,6 +21,10 @@ struct ContentView: View {
     /// Manages the LaunchAgents copy that enables launch-at-login.
     @State private var autostart = AutostartController()
 
+    /// The daemon's live state (equalizer bands), refreshed on a timer
+    /// while the window is open.
+    @State private var stateReader = StateReader()
+
     /// Install failures surface in an alert (same pattern as ControlRow).
     @State private var installErrorMessage = ""
 
@@ -29,6 +33,7 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ControlRow(controller: controller)
+            EqualizerView(bands: stateReader.bands)
             Divider()
             DeviceSection(store: store)
             Divider()
@@ -45,6 +50,10 @@ struct ContentView: View {
         .onAppear {
             controller.refreshStatus()
             logReader.refresh()
+            stateReader.start()
+        }
+        .onDisappear {
+            stateReader.stop()
         }
         .task {
             // Preview hosts run the whole app (same bundle ID) and unit

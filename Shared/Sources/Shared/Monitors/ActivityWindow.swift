@@ -20,6 +20,11 @@ public struct ActivityWindow {
     /// Slots older than this are ignored by the fraction.
     public var windowDuration: TimeInterval { slotDuration * Double(slots.count) }
 
+    /// The default window (10 s) — also the stall threshold for the
+    /// capture: buffers arriving more rarely than this read as a frozen
+    /// stream.
+    public static let defaultWindowDuration: TimeInterval = 10
+
     /// (timestamp, active) per slot. Timestamp 0 = slot never written.
     private var slots: [(at: TimeInterval, active: Bool)]
 

@@ -13,7 +13,10 @@ public final class SpeakerOutputMonitor {
     private var cachedDeviceID: AudioDeviceID?
 
     /// Whether the speaker's output device is currently running; nil
-    /// when there is no MAC or no matching CoreAudio device.
+    /// only when there is no configured MAC. A MAC whose CoreAudio
+    /// device is missing (the speaker powered off or disconnected)
+    /// reads as false — no device means no audio can reach it, so a
+    /// disappearance is information, not blindness.
     public func isRunning(mac: String?) -> Bool? {
         guard let mac, let normalized = BluetoothMAC.normalize(mac) else {
             return nil
@@ -29,15 +32,15 @@ public final class SpeakerOutputMonitor {
         } else {
             cachedMAC = nil
             cachedDeviceID = nil
-            return nil
+            return false
         }
 
         guard let running = Self.isRunningSomewhere(deviceID) else {
-            // The device went away (disconnect) — drop the cache so the
-            // next poll resolves it anew.
+            // The cached device went away (power-off, disconnect) —
+            // drop the cache so the next poll resolves it anew.
             cachedMAC = nil
             cachedDeviceID = nil
-            return nil
+            return false
         }
         return running != 0
     }
