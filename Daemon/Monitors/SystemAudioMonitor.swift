@@ -19,6 +19,13 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
     /// falls back to the legacy signals instead of trusting garbage.
     private var formatVerified = false
     private var formatIsFloat32 = false
+    /// The actual sample rate of the delivered buffers, read from the
+    /// format description — the FFT bin width depends on it.
+    private var sampleRate = 48_000.0
+    /// Rolling mono frame for the FFT bands.
+    private var monoFrame = [Float]()
+    /// Latest normalized band levels, 0…1.
+    private var bands = [Double](repeating: 0, count: AudioBands.bandCount)
 
     private(set) var isRunning = false
     /// Human-readable reason why the capture is not running, if any.
@@ -77,6 +84,14 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
         return window.isPlaying(at: Date().timeIntervalSinceReferenceDate)
     }
 
+    /// The latest equalizer bands, 0…1 (zeros while the capture is
+    /// down or silent).
+    public func snapshotBands() -> [Double] {
+        lock.lock()
+        defer { lock.unlock() }
+        return bands
+    }
+
     // MARK: - SCStreamOutput
 
     public func stream(
@@ -100,6 +115,7 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
                 DaemonLog.print("audio capture: unexpected format — legacy signals")
                 return
             }
+            sampleRate = asbd.pointee.mSampleRate
         }
         guard formatIsFloat32 else { return }
 
@@ -116,6 +132,21 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
         var sum = 0.0
         for i in 0..<count { sum += Double(samples[i] * samples[i]) }
         let rms = (sum / Double(count)).squareRoot()
+
+        // Mono mix for the FFT frame (interleaved stereo pairs).
+        let pairCount = count / 2
+        if pairCount > 0 {
+            monoFrame.reserveCapacity(AudioBands.frameSize)
+            for pair in 0..<pairCount {
+                monoFrame.append((samples[pair * 2] + samples[pair * 2 + 1]) * 0.5)
+            }
+            if monoFrame.count >= AudioBands.frameSize {
+                let frame = Array(monoFrame.prefix(AudioBands.frameSize))
+                monoFrame.removeFirst(AudioBands.frameSize)
+                bands = AudioBands.compute(
+                    frame: frame, sampleRate: sampleRate)
+            }
+        }
 
         latestRMS = rms
         window.mark(

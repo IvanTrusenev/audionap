@@ -67,7 +67,11 @@ struct AudioNapDaemon: ParsableCommand {
             loop.update(config: newConfig)
         }
 
+        let publisher = StatePublisher(monitor: systemAudio)
+        publisher.start()
+
         loop.run()
+        publisher.stop()
         // Best-effort cleanup — the capture dies with the process anyway.
         Task { await systemAudio.stop() }
         // A marker in the log that the daemon exited on its own — a
