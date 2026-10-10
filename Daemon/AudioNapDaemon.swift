@@ -46,13 +46,30 @@ struct AudioNapDaemon: ParsableCommand {
         // blocks, so unbuffer per line or the log looks dead.
         setvbuf(stdout, nil, _IOLBF, 0)
 
-        let loop = DaemonLoop(config: AppConfig.load(from: Paths.configURL))
+        let systemAudio = SystemAudioMonitor()
+        Task {
+            // The capture is best-effort: without the permission or on
+            // stream errors the monitor stays down and the loop keeps
+            // working on the legacy playing signals.
+            do {
+                try await systemAudio.start()
+            } catch {
+                DaemonLog.print(
+                    "audio capture: unavailable — legacy playing signals (\(String(describing: error)))")
+            }
+        }
+
+        let loop = DaemonLoop(
+            config: AppConfig.load(from: Paths.configURL),
+            systemAudio: systemAudio)
         let watcher = ConfigWatcher()
         watcher.start { newConfig in
             loop.update(config: newConfig)
         }
 
         loop.run()
+        // Best-effort cleanup — the capture dies with the process anyway.
+        Task { await systemAudio.stop() }
         // A marker in the log that the daemon exited on its own — a
         // SIGKILL from launchd's exit-timeout leaves no such line.
         DaemonLog.print("stopped cleanly")

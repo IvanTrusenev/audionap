@@ -10,6 +10,9 @@ public final class DaemonLoop {
     private let assertionSource = PowerAssertionSource()
     private let idleMonitor = IdleMonitor()
     private let bluetooth = BluetoothController()
+    /// The universal playing signal; nil while its capture is not
+    /// running — the step falls back to the legacy assertion signal.
+    private let systemAudio: SystemAudioMonitor
 
     /// Consecutive steps where blueutil could not be launched. After the
     /// threshold the daemon exits so launchd's KeepAlive starts a fresh
@@ -23,8 +26,9 @@ public final class DaemonLoop {
     private static let blueutilFailureThreshold = 30  // 5 min at a 10 s poll
     private static let waitingPingEvery = 60  // 10 min at a 10 s poll
 
-    public init(config: AppConfig) {
+    public init(config: AppConfig, systemAudio: SystemAudioMonitor) {
         self.config = config
+        self.systemAudio = systemAudio
     }
 
     public func run() {
@@ -82,7 +86,9 @@ public final class DaemonLoop {
         }
         waitingSteps = 0
 
-        let playing = assertionSource.isPlayingAudio()
+        // The universal signal wins while its capture runs; the legacy
+        // assertion (which folds in the MediaRemote rate) is the fallback.
+        let playing = systemAudio.isPlaying() ?? assertionSource.isPlayingAudio()
         let idleSeconds = Int(idleMonitor.idleSeconds())
 
         if playing {

@@ -511,6 +511,12 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreMedia,
+					"-framework",
+					ScreenCaptureKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = online.threealab.audionap.daemon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -525,6 +531,12 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreMedia,
+					"-framework",
+					ScreenCaptureKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = online.threealab.audionap.daemon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
