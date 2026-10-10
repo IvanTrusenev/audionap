@@ -513,6 +513,8 @@
 				CODE_SIGN_STYLE = Manual;
 				OTHER_LDFLAGS = (
 					"-framework",
+					CoreAudio,
+					"-framework",
 					CoreMedia,
 					"-framework",
 					ScreenCaptureKit,
@@ -532,6 +534,8 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				OTHER_LDFLAGS = (
+					"-framework",
+					CoreAudio,
 					"-framework",
 					CoreMedia,
 					"-framework",

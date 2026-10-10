@@ -13,6 +13,8 @@ public final class DaemonLoop {
     /// The universal playing signal; nil while its capture is not
     /// running — the step falls back to the legacy assertion signal.
     private let systemAudio: SystemAudioMonitor
+    /// Per-device gate: whether the speaker is the output target.
+    private let speakerGate = SpeakerOutputMonitor()
 
     /// Consecutive steps where blueutil could not be launched. After the
     /// threshold the daemon exits so launchd's KeepAlive starts a fresh
@@ -88,7 +90,14 @@ public final class DaemonLoop {
 
         // The universal signal wins while its capture runs; the legacy
         // assertion (which folds in the MediaRemote rate) is the fallback.
-        let playing = systemAudio.isPlaying() ?? assertionSource.isPlayingAudio()
+        // The gate is best-effort: an unobservable speaker reads as "on"
+        // so the universal signal alone decides rather than blocking
+        // disconnects on a blind gate.
+        let playing =
+            systemAudio.isPlaying().map { fractionPlaying in
+                (speakerGate.isRunning(mac: config.speakerMAC) ?? true)
+                    && fractionPlaying
+            } ?? assertionSource.isPlayingAudio()
         let idleSeconds = Int(idleMonitor.idleSeconds())
 
         if playing {
