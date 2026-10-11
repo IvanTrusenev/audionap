@@ -98,6 +98,16 @@ released (2026-10-10): the first release built by release.yml (tag →
 universal build via release.sh → draft → human publish), the cask
 bumped to 0.2.0 (style/audit clean), and the live brew upgrade
 verified end to end (app 0.2.0, the daemon reinstalled via the
-version marker and running, Stop/Start quick and clean). Left for a
-convenient moment: the uninstall --zap cycle (with a config backup)
-and the manual zip path.
+version marker and running, Stop/Start quick and clean). Universal
+playback signal ✓ (2026-10-10/11, verified live): the daemon captures
+the system audio mix (ScreenCaptureKit) into a 10s activity window and
+gates it on the speaker's CoreAudio output — playing means audio
+actually reaches the speaker from any app (Telemost, browser, music),
+with the legacy assertion signal as fallback while the capture is
+unavailable; the capture recovers from screen-lock stalls, and a
+powered-off speaker reads as silent. The menu bar shows a 16-band
+VU-meter equalizer of the same signal. e2e: Telemost/browser held,
+full silence+idle → disconnect cycle passed under launchd; release CPU
+~3.7% of a core. Left for a convenient moment: the uninstall --zap
+cycle (with a config backup) and the manual zip path; the plutil-config
+watcher quirk (external edits don't hot-reload).

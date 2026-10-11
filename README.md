@@ -4,30 +4,31 @@ Menu bar app for macOS that puts your Bluetooth speaker to sleep when you are aw
 
 Bluetooth speakers suspend their own auto-off timer while a Bluetooth
 connection is active. macOS holds that connection open even in silence, so the
-speaker never sleeps. AudioNap watches for silence (the "Playing audio" power
-assertion) and user inactivity, then drops the Bluetooth connection — and
-the speaker's own firmware timer does the rest.
-
-> **Status:** the first release, v0.1.0, is being packaged. The app and the
-> daemon are feature-complete and have been running on the author's machine
-> through the full silence → disconnect → power-off cycle.
+speaker never sleeps. AudioNap watches whether audio is actually reaching the
+speaker — from any app — plus user inactivity, then drops the Bluetooth
+connection, and the speaker's own firmware timer does the rest.
 
 ## Components
 
 | Component | Description |
 |-----------|-------------|
-| `AudioNap.app` | SwiftUI menu bar app: start/stop the daemon, pick a device, tune timeouts, view logs |
+| `AudioNap.app` | SwiftUI menu bar app: start/stop the daemon, pick a device, tune timeouts, view logs, live VU-meter equalizer |
 | `audionapd` | Headless daemon (launchd agent): disconnects the speaker after N minutes of silence + inactivity |
 
 ## How it works
 
 ```
 every pollSeconds (default 10 s):
-  playing = "Playing audio" power assertion (held by Chromium-family players)
+  playing = the speaker's CoreAudio device is the output target AND the
+            captured system audio mix is active (universal: music, calls,
+            browsers — any source)
   idle    = seconds since last user input
   quiet for N minutes + idle → blueutil disconnect
 speaker's own 15-minute timer → powers off
 ```
+
+When the audio capture is unavailable (no permission, no display), the
+daemon falls back to the legacy "Playing audio" power-assertion signal.
 
 ## Install
 
@@ -61,6 +62,22 @@ AudioNap is ad-hoc signed and not notarized, so macOS blocks the first launch
 Repeat after every update — each ad-hoc signature is new, and macOS 15 and
 later no longer offer the right-click override.
 
+### Audio capture permission
+
+The daemon detects playback by capturing the system audio mix
+(ScreenCaptureKit), which macOS groups under the Screen Recording category:
+
+1. Start the daemon once — the first attempt requests the permission.
+2. Open **System Settings → Privacy & Security → Screen & System Audio
+   Recording** and enable **audionapd**.
+3. Restart the daemon (Stop, then Start in the app) — the capture starts
+   and the menu bar equalizer comes alive.
+
+AudioNap never captures video — macOS simply files audio-only streams under
+this category. Without the permission the daemon keeps working on the legacy
+playback signal. Macs without a display (headless) cannot run the capture
+either and use the same fallback.
+
 ## Uninstall
 
 ```bash
@@ -89,7 +106,7 @@ Release build and packaging from the command line:
 
 ```bash
 just build            # universal Release app with verification gates
-just release 0.1.0    # dist/: AudioNap-0.1.0.zip, audionapd-0.1.0.zip, SHA256SUMS.txt
+just release 0.3.0    # dist/: AudioNap-0.3.0.zip, audionapd-0.3.0.zip, SHA256SUMS.txt
 ```
 
 or
