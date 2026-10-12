@@ -20,7 +20,12 @@ struct AudioNapDaemon: ParsableCommand {
 
     func run() throws {
         if testOnce {
-            let mac = ProcessInfo.processInfo.environment["AUDIONAP_SPEAKER_MAC"] ?? "aa-bb-cc-dd-ee-ff"
+            let rawMAC = ProcessInfo.processInfo.environment["AUDIONAP_SPEAKER_MAC"]
+                ?? "aa-bb-cc-dd-ee-ff"
+            guard let mac = BluetoothMAC(rawMAC) else {
+                print("connected: unknown (invalid MAC)")
+                return
+            }
             guard let connected = BluetoothController().isConnected(to: mac) else {
                 print("connected: unknown (blueutil unreachable)")
                 return

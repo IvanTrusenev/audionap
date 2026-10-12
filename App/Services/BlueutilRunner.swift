@@ -19,9 +19,9 @@ public enum BlueutilRunner {
     }
 
     /// Reconnects the device — the reverse of the daemon's disconnect.
-    public static func connect(to address: String) async throws {
+    public static func connect(to address: BluetoothMAC) async throws {
         try await Task.detached(priority: .userInitiated) {
-            guard let result = runBlocking(arguments: ["--connect", address]) else {
+            guard let result = runBlocking(arguments: ["--connect", address.value]) else {
                 throw BlueutilRunnerError.notFound
             }
             guard result.exitCode == 0 else {
@@ -29,11 +29,11 @@ public enum BlueutilRunner {
             }
         }.value
     }
-    
+
     /// Whether the device is connected, per blueutil.
-    public static func isConnected(to address: String) async -> Bool {
+    public static func isConnected(to address: BluetoothMAC) async -> Bool {
         await Task.detached(priority: .userInitiated) {
-            guard let result = runBlocking(arguments: ["--is-connected", address]) else {
+            guard let result = runBlocking(arguments: ["--is-connected", address.value]) else {
                 return false
             }
             return BlueutilParser.isConnected(output: result.output)
@@ -42,9 +42,9 @@ public enum BlueutilRunner {
 
     /// Disconnects the device — the manual counterpart of the daemon's
     /// automatic disconnect.
-    public static func disconnect(from address: String) async throws {
+    public static func disconnect(from address: BluetoothMAC) async throws {
         try await Task.detached(priority: .userInitiated) {
-            guard let result = runBlocking(arguments: ["--disconnect", address]) else {
+            guard let result = runBlocking(arguments: ["--disconnect", address.value]) else {
                 throw BlueutilRunnerError.notFound
             }
             guard result.exitCode == 0 else {

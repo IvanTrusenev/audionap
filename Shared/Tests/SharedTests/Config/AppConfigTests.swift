@@ -65,9 +65,18 @@ struct AppConfigTests {
         ]
         let data = try! PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
         let config = try! PropertyListDecoder().decode(AppConfig.self, from: data)
-        #expect(config.speakerMAC == "aa-bb-cc-dd-ee-ff")
+        #expect(config.speakerMAC == BluetoothMAC("aa-bb-cc-dd-ee-ff"))
         #expect(config.silenceTimeoutMinutes == 7)
         #expect(config.inputWindowMinutes == AppConfig.defaultInputWindowMinutes)  // default
+    }
+
+    /// A malformed MAC in the plist must not fail the whole load — it
+    /// reads as "no speaker", in the spirit of the forgiving decode.
+    @Test func malformedMACFallsBackToNil() throws {
+        let plist: [String: Any] = ["speakerMAC": "not-a-mac"]
+        let data = try! PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
+        let config = try! PropertyListDecoder().decode(AppConfig.self, from: data)
+        #expect(config.speakerMAC == nil)
     }
 
     @Test func brokenPlistFallsBackToDefaults() {
@@ -98,7 +107,7 @@ struct AppConfigTests {
 
     @Test func roundtripPreservesValues() throws {
         var config = AppConfig()
-        config.speakerMAC = "aa-bb-cc-dd-ee-ff"
+        config.speakerMAC = BluetoothMAC("aa-bb-cc-dd-ee-ff")
         config.silenceTimeoutMinutes = 12
         config.inputWindowMinutes = 8
         config.ignoreUserActivity = true

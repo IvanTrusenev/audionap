@@ -14,8 +14,8 @@ struct BlueutilPairedParserTests {
 
         #expect(
             devices == [
-                BlueutilDevice(address: "00-76-25-22-04-db", name: "Vault", connected: false),
-                BlueutilDevice(address: "08-eb-ed-ab-41-9b", name: "Mi Speaker", connected: true),
+                BlueutilDevice(address: BluetoothMAC("00-76-25-22-04-db")!, name: "Vault", connected: false),
+                BlueutilDevice(address: BluetoothMAC("08-eb-ed-ab-41-9b")!, name: "Mi Speaker", connected: true),
             ])
     }
 
@@ -43,7 +43,7 @@ struct BlueutilPairedParserTests {
 
         #expect(
             devices == [
-                BlueutilDevice(address: "aa-bb-cc-dd-ee-ff", name: "", connected: false)
+                BlueutilDevice(address: BluetoothMAC("aa-bb-cc-dd-ee-ff")!, name: "", connected: false)
             ])
     }
 }

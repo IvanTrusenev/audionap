@@ -10,8 +10,8 @@ public struct SpeakerDeviceUID: Equatable {
         case output
     }
 
-    /// The speaker's MAC in the canonical blueutil form.
-    public let mac: String
+    /// The speaker's MAC, canonical by construction.
+    public let mac: BluetoothMAC
     public let side: Side
 
     /// Parses a CoreAudio device UID; nil when the string is not a
@@ -23,7 +23,7 @@ public struct SpeakerDeviceUID: Equatable {
             return nil
         }
         let macPart = String(lower.dropLast(side.rawValue.count + 1))
-        guard let mac = BluetoothMAC.normalize(macPart) else { return nil }
+        guard let mac = BluetoothMAC(macPart) else { return nil }
         return SpeakerDeviceUID(mac: mac, side: side)
     }
 }

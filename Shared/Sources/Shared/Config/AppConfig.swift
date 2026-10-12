@@ -6,8 +6,9 @@ import Foundation
 /// Rules from the plan: unknown keys are tolerated (ignored), invalid values
 /// fall back to defaults with a log warning — never crash.
 public struct AppConfig: Codable, Equatable, Sendable {
-    /// Speaker MAC in blueutil format (`aa-bb-cc-dd-ee-ff`).
-    public var speakerMAC: String?
+    /// The speaker the daemon babysits; nil = none selected. Stored as a
+    /// plain string in the plist; malformed values decode to nil.
+    public var speakerMAC: BluetoothMAC?
     public var silenceTimeoutMinutes: Int
     public var inputWindowMinutes: Int
     public var ignoreUserActivity: Bool
@@ -39,7 +40,7 @@ public struct AppConfig: Codable, Equatable, Sendable {
     public var inputWindowSeconds: Int { inputWindowMinutes * 60 }
 
     public init(
-        speakerMAC: String? = nil,
+        speakerMAC: BluetoothMAC? = nil,
         silenceTimeoutMinutes: Int = Self.defaultSilenceTimeoutMinutes,
         inputWindowMinutes: Int = Self.defaultInputWindowMinutes,
         ignoreUserActivity: Bool = false,
@@ -65,7 +66,12 @@ public struct AppConfig: Codable, Equatable, Sendable {
     /// older app version or by hand.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        // Decoded as a string, not directly as BluetoothMAC: the type's
+        // own decode throws on a malformed value, but the forgiving
+        // config decode must fall back to nil instead — garbage in the
+        // plist becomes "no speaker", never a failed load.
         speakerMAC = try container.decodeIfPresent(String.self, forKey: .speakerMAC)
+            .flatMap(BluetoothMAC.init)
         silenceTimeoutMinutes =
             try container.decodeIfPresent(Int.self, forKey: .silenceTimeoutMinutes) ?? Self.defaultSilenceTimeoutMinutes
         inputWindowMinutes =

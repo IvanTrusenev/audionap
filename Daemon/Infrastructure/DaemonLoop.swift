@@ -62,7 +62,7 @@ public final class DaemonLoop {
     }
 
     private func step() {
-        guard let mac = config.speakerMAC, !mac.isEmpty else { return }
+        guard let mac = config.speakerMAC else { return }
 
         guard let connected = bluetooth.isConnected(to: mac) else {
             blueutilFailures += 1
@@ -168,7 +168,7 @@ public final class DaemonLoop {
         guard config != self.config else { return }
         self.config = config
         DaemonLog.print(
-            "config reloaded: speaker=\(config.speakerMAC ?? "none") silence=\(config.silenceTimeoutMinutes)m input=\(config.inputWindowMinutes)m ignoreActivity=\(config.ignoreUserActivity)"
+            "config reloaded: speaker=\(config.speakerMAC?.description ?? "none") silence=\(config.silenceTimeoutMinutes)m input=\(config.inputWindowMinutes)m ignoreActivity=\(config.ignoreUserActivity)"
         )
     }
 

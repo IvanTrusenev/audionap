@@ -17,16 +17,16 @@ public final class SpeakerOutputMonitor {
     /// device is missing (the speaker powered off or disconnected)
     /// reads as false — no device means no audio can reach it, so a
     /// disappearance is information, not blindness.
-    public func isRunning(mac: String?) -> Bool? {
-        guard let mac, let normalized = BluetoothMAC.normalize(mac) else {
+    public func isRunning(mac: BluetoothMAC?) -> Bool? {
+        guard let mac else {
             return nil
         }
 
         let deviceID: AudioDeviceID
-        if let cached = cachedDeviceID, cachedMAC == normalized {
+        if let cached = cachedDeviceID, cachedMAC == mac.value {
             deviceID = cached
-        } else if let resolved = Self.resolveOutputDevice(mac: normalized) {
-            cachedMAC = normalized
+        } else if let resolved = Self.resolveOutputDevice(mac: mac) {
+            cachedMAC = mac.value
             cachedDeviceID = resolved
             deviceID = resolved
         } else {
@@ -45,10 +45,10 @@ public final class SpeakerOutputMonitor {
         return running != 0
     }
 
-    /// Finds the output device whose UID matches the speaker MAC.
-    /// `mac` arrives canonical (normalized by the caller), and parse
-    /// returns the canonical form too, so the comparison is exact.
-    private static func resolveOutputDevice(mac: String) -> AudioDeviceID? {
+    /// Finds the output device whose UID matches the speaker MAC. Both
+    /// sides of the comparison are canonical by construction, so the
+    /// equality is exact.
+    private static func resolveOutputDevice(mac: BluetoothMAC) -> AudioDeviceID? {
         allDevices().first { deviceID in
             guard let uid = readString(deviceID, kAudioDevicePropertyDeviceUID),
                   let parsed = SpeakerDeviceUID.parse(uid) else {

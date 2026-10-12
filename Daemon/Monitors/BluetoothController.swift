@@ -8,14 +8,14 @@ public struct BluetoothController {
     /// true/false when blueutil answered; nil when it could not be
     /// launched — the loop treats repeated nils as tool failure, not as
     /// "not connected".
-    public func isConnected(to mac: String) -> Bool? {
-        let result = runBlueutil(arguments: ["--is-connected", mac])
+    public func isConnected(to mac: BluetoothMAC) -> Bool? {
+        let result = runBlueutil(arguments: ["--is-connected", mac.value])
         return result.map { BlueutilParser.isConnected(output: $0.output) }
     }
 
     /// Drops the connection; throws when blueutil fails.
-    public func disconnect(_ mac: String) throws {
-        guard let result = runBlueutil(arguments: ["--disconnect", mac]) else {
+    public func disconnect(_ mac: BluetoothMAC) throws {
+        guard let result = runBlueutil(arguments: ["--disconnect", mac.value]) else {
             throw BlueutilError.notFound
         }
         guard result.exitCode == 0 else {

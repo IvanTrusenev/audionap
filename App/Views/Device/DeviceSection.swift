@@ -50,10 +50,10 @@ struct DeviceSection: View {
                 .disabled(store.speakerMAC == nil || isUpdatingConnection)
             }
             Picker("device.title", selection: selectedMAC) {
-                Text("device.none").tag(String?.none)
+                Text("device.none").tag(BluetoothMAC?.none)
                 ForEach(sortedDevices, id: \.address) { device in
                     Text(verbatim: "\(device.name) — \(device.address)")
-                        .tag(String?.some(device.address))
+                        .tag(BluetoothMAC?.some(device.address))
                 }
             }
             .labelsHidden()
@@ -72,7 +72,7 @@ struct DeviceSection: View {
             await pollConnectionState()
         }
         .onChange(of: store.speakerMAC) { _, newValue in
-            manualInput = newValue ?? ""
+            manualInput = newValue?.description ?? ""
             showingInvalidHint = false
         }
         .alert("error.title", isPresented: $showingError) {
@@ -84,7 +84,7 @@ struct DeviceSection: View {
 
     /// Picker selection writes straight into the config store — the
     /// daemon hot-reloads, the manual field mirrors it.
-    private var selectedMAC: Binding<String?> {
+    private var selectedMAC: Binding<BluetoothMAC?> {
         Binding(
             get: { store.speakerMAC },
             set: { store.speakerMAC = $0 }
@@ -110,7 +110,7 @@ struct DeviceSection: View {
     /// Commits the manual entry when it normalizes to a MAC; otherwise
     /// shows the hint and keeps the stored value untouched.
     private func submitManual() {
-        guard let normalized = BluetoothMAC.normalize(manualInput) else {
+        guard let normalized = BluetoothMAC(manualInput) else {
             showingInvalidHint = true
             return
         }

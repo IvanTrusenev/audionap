@@ -38,7 +38,7 @@ public final class ConfigStore {
 
     /// The speaker the daemon babysits; nil = none selected. Written by
     /// the device picker, hot-reloaded by the daemon like every setting.
-    public var speakerMAC: String? {
+    public var speakerMAC: BluetoothMAC? {
         get { config.speakerMAC }
         set {
             config.speakerMAC = newValue

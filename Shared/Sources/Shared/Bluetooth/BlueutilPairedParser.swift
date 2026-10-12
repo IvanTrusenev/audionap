@@ -24,14 +24,16 @@ public enum BlueutilPairedParser {
         )
     }
 
-    /// The first MAC-looking token in the line.
-    private static func address(in line: String) -> String? {
+    /// The first MAC-looking token in the line, as a validated address.
+    /// The regex pins blueutil's dashed output format; the initializer
+    /// does the rest of the validation.
+    private static func address(in line: String) -> BluetoothMAC? {
         guard
             let match = line.firstMatch(
                 of: /address: ([0-9a-fA-F]{2}(?:-[0-9a-fA-F]{2}){5})/
             )
         else { return nil }
-        return String(match.1)
+        return BluetoothMAC(String(match.1))
     }
 
     /// The text between the first pair of quotes after `name:`.
