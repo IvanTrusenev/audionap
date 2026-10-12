@@ -45,6 +45,10 @@ when the team agrees on a new convention.
 - Units of measurement go into the name: `silenceTimeoutMinutes` vs
   `silenceTimeoutSeconds`; keep each unit conversion in exactly one place
 - Document public API with `///` comments; explain *why*, not what
+- Regex patterns live in `Shared/Support/RegexPatterns.swift` — before
+  writing a new pattern, look there first: two patterns meaning the
+  same thing must never coexist. Names carry a domain prefix
+  (`blueutilAddress`), the collection itself is domain-neutral
 - Public API returns named types, not tuples — tuples are for short-lived
   values internal to a function
 - Log through `os.Logger` with subsystem `online.threealab.audionap`

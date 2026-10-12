@@ -25,20 +25,16 @@ public enum BlueutilPairedParser {
     }
 
     /// The first MAC-looking token in the line, as a validated address.
-    /// The regex pins blueutil's dashed output format; the initializer
-    /// does the rest of the validation.
     private static func address(in line: String) -> BluetoothMAC? {
-        guard
-            let match = line.firstMatch(
-                of: /address: ([0-9a-fA-F]{2}(?:-[0-9a-fA-F]{2}){5})/
-            )
-        else { return nil }
+        guard let match = line.firstMatch(of: RegexPatterns.blueutilAddress) else {
+            return nil
+        }
         return BluetoothMAC(String(match.1))
     }
 
     /// The text between the first pair of quotes after `name:`.
     private static func name(in line: String) -> String? {
-        guard let match = line.firstMatch(of: /name: "([^"]*)"/) else {
+        guard let match = line.firstMatch(of: RegexPatterns.blueutilName) else {
             return nil
         }
         return String(match.1)
@@ -47,6 +43,6 @@ public enum BlueutilPairedParser {
     /// True when the line reports the device as connected (as opposed
     /// to "not connected").
     private static func connected(in line: String) -> Bool {
-        line.firstMatch(of: /, (connected)/) != nil
+        line.firstMatch(of: RegexPatterns.blueutilConnected) != nil
     }
 }
