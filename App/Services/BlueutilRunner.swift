@@ -14,7 +14,7 @@ public enum BlueutilRunner {
             guard let result = runBlocking(arguments: ["--paired"]) else {
                 return []
             }
-            return BlueutilPairedParser.parse(output: result.output)
+            return BlueutilParser.pairedDevices(output: result.output)
         }.value
     }
 
