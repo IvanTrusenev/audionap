@@ -4,38 +4,42 @@ import Testing
 
 struct SpeakerDeviceUIDTests {
 
-    @Test func speakerOutputMatches() {
-        #expect(
-            SpeakerDeviceUID.isSpeakerOutput(
-                uid: "AC-EF-92-D8-A6-7B:output",
-                mac: "ac-ef-92-d8-a6-7b"))
+    @Test func outputSideParses() throws {
+        let device = try #require(
+            SpeakerDeviceUID.parse("AC-EF-92-D8-A6-7B:output"))
+        #expect(device.mac == "ac-ef-92-d8-a6-7b")
+        #expect(device.side == .output)
     }
 
-    @Test func speakerInputIsNotTheOutput() {
-        #expect(
-            !SpeakerDeviceUID.isSpeakerOutput(
-                uid: "AC-EF-92-D8-A6-7B:input",
-                mac: "ac-ef-92-d8-a6-7b"))
+    @Test func inputSideParses() throws {
+        let device = try #require(
+            SpeakerDeviceUID.parse("AC-EF-92-D8-A6-7B:input"))
+        #expect(device.mac == "ac-ef-92-d8-a6-7b")
+        #expect(device.side == .input)
     }
 
-    @Test func anotherDeviceDoesNotMatch() {
-        #expect(
-            !SpeakerDeviceUID.isSpeakerOutput(
-                uid: "11-22-33-44-55-66:output",
-                mac: "ac-ef-92-d8-a6-7b"))
+    @Test func colonFormMACNormalizes() throws {
+        let device = try #require(
+            SpeakerDeviceUID.parse("AC:EF:92:D8:A6:7B:output"))
+        #expect(device.mac == "ac-ef-92-d8-a6-7b")
+        #expect(device.side == .output)
     }
 
-    @Test func colonFormMACMatches() {
-        #expect(
-            SpeakerDeviceUID.isSpeakerOutput(
-                uid: "AC:EF:92:D8:A6:7B:output",
-                mac: "ac:ef:92:d8:a6:7b"))
+    @Test func anotherDeviceCarriesItsOwnMAC() throws {
+        let device = try #require(
+            SpeakerDeviceUID.parse("11-22-33-44-55-66:output"))
+        #expect(device.mac == "11-22-33-44-55-66")
     }
 
-    @Test func garbageMACReturnsFalse() {
-        #expect(
-            !SpeakerDeviceUID.isSpeakerOutput(
-                uid: "AC-EF-92-D8-A6-7B:output",
-                mac: "not-a-mac"))
+    @Test func unknownSideReturnsNil() {
+        #expect(SpeakerDeviceUID.parse("AC-EF-92-D8-A6-7B:mic") == nil)
+    }
+
+    @Test func invalidMACPartReturnsNil() {
+        #expect(SpeakerDeviceUID.parse("AC-EF-92-D8-A6:output") == nil)
+    }
+
+    @Test func garbageReturnsNil() {
+        #expect(SpeakerDeviceUID.parse("not-a-uid") == nil)
     }
 }

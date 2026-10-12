@@ -46,12 +46,15 @@ public final class SpeakerOutputMonitor {
     }
 
     /// Finds the output device whose UID matches the speaker MAC.
+    /// `mac` arrives canonical (normalized by the caller), and parse
+    /// returns the canonical form too, so the comparison is exact.
     private static func resolveOutputDevice(mac: String) -> AudioDeviceID? {
         allDevices().first { deviceID in
-            guard let uid = readString(deviceID, kAudioDevicePropertyDeviceUID) else {
+            guard let uid = readString(deviceID, kAudioDevicePropertyDeviceUID),
+                  let parsed = SpeakerDeviceUID.parse(uid) else {
                 return false
             }
-            return SpeakerDeviceUID.isSpeakerOutput(uid: uid, mac: mac)
+            return parsed.side == .output && parsed.mac == mac
         }
     }
 
