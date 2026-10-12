@@ -16,10 +16,6 @@ public final class DaemonLoop {
     /// Per-device gate: whether the speaker is the output target.
     private let speakerGate: SpeakerOutputMonitor
 
-    /// The currently configured speaker MAC, for the state publisher's
-    /// band gating.
-    var speakerMAC: String? { config.speakerMAC }
-
     /// Consecutive steps where blueutil could not be launched. After the
     /// threshold the daemon exits so launchd's KeepAlive starts a fresh
     /// process — a live daemon whose tool calls silently fail leaves the
@@ -103,16 +99,7 @@ public final class DaemonLoop {
         }
         waitingSteps = 0
 
-        // The universal signal wins while its capture runs; the legacy
-        // assertion (which folds in the MediaRemote rate) is the fallback.
-        // The gate is best-effort: it reads open only without a
-        // configured speaker — a speaker whose CoreAudio device is
-        // gone reads closed (no device, no audio).
-        let playing =
-            systemAudio.isPlaying().map { fractionPlaying in
-                (speakerGate.isRunning(mac: config.speakerMAC) ?? true)
-                    && fractionPlaying
-            } ?? assertionSource.isPlayingAudio()
+        let playing = currentPlaying()
         let idleSeconds = Int(idleMonitor.idleSeconds())
 
         if playing {
@@ -135,6 +122,40 @@ public final class DaemonLoop {
         }
 
         DaemonLog.print("step: \(decision) quiet=\(quietAtDecision)s idle=\(idleSeconds)s")
+    }
+
+    /// The playing rule shared by the decision step and the state
+    /// snapshot — the UI's `playing` can never diverge from the signal
+    /// the decision consumes. The universal signal wins while its
+    /// capture runs; the legacy assertion (which folds in the
+    /// MediaRemote rate) is the fallback. The gate is best-effort: it
+    /// reads open only without a configured speaker — a speaker whose
+    /// CoreAudio device is gone reads closed (no device, no audio).
+    private func currentPlaying() -> Bool {
+        systemAudio.isPlaying().map { fractionPlaying in
+            (speakerGate.isRunning(mac: config.speakerMAC) ?? true)
+                && fractionPlaying
+        } ?? assertionSource.isPlayingAudio()
+    }
+
+    /// The live state snapshot the publisher writes at 10 Hz: bands
+    /// gated to the speaker (the equalizer reflects the speaker, not
+    /// the whole mix), `playing` from the shared rule, the counters
+    /// and thresholds from the live loop state. Called by the
+    /// publisher's timer on the main run loop — the same context the
+    /// loop runs on, so the counters need no synchronization.
+    func snapshotState() -> LiveState {
+        let gated = (speakerGate.isRunning(mac: config.speakerMAC) ?? true)
+            ? systemAudio.snapshotBands()
+            : [Double](repeating: 0, count: AudioBands.bandCount)
+        return LiveState(
+            bands: gated,
+            playing: currentPlaying(),
+            quietSeconds: quietSeconds,
+            idleSeconds: Int(idleMonitor.idleSeconds()),
+            silenceTimeoutSeconds: config.silenceTimeoutSeconds,
+            inputWindowSeconds: config.inputWindowSeconds,
+            updatedAt: Date())
     }
 
     /// Applies a reloaded config — the watcher calls this on the main queue,

@@ -2,28 +2,21 @@ import CoreFoundation
 import Foundation
 import Shared
 
-/// Publishes the live state (equalizer bands) into
-/// `Paths.stateURL` a few times a second. Driven by a CFRunLoop timer
-/// on the daemon's main run loop — the slices in DaemonLoop.run pump
-/// it; no GCD, no extra threads. Write failures are logged once and
-/// the publisher keeps going: the state file is a convenience, not a
-/// contract.
+/// Publishes the daemon's live state into `Paths.stateURL` at 10 Hz.
+/// Driven by a CFRunLoop timer on the daemon's main run loop — the
+/// slices in DaemonLoop.run pump it; no GCD, no extra threads. The
+/// snapshot itself comes from the loop (the owner of the counters and
+/// the playing rule); this class is just the transport: timer,
+/// encode, write. Write failures are logged once and the publisher
+/// keeps going: the state file is a convenience, not a contract.
 public final class StatePublisher {
-    private let monitor: SystemAudioMonitor
-    private let speakerGate: SpeakerOutputMonitor
-    /// The current speaker MAC — the loop owns the hot-reloaded config.
-    private let macProvider: () -> String?
+    /// Provides the snapshot to publish — DaemonLoop.snapshotState().
+    private let stateProvider: () -> LiveState
     private var timer: CFRunLoopTimer?
     private var failureLogged = false
 
-    public init(
-        monitor: SystemAudioMonitor,
-        speakerGate: SpeakerOutputMonitor,
-        macProvider: @escaping () -> String?
-    ) {
-        self.monitor = monitor
-        self.speakerGate = speakerGate
-        self.macProvider = macProvider
+    public init(stateProvider: @escaping () -> LiveState) {
+        self.stateProvider = stateProvider
     }
 
     /// Installs the timer on the current run loop (the daemon main).
@@ -51,16 +44,7 @@ public final class StatePublisher {
     }
 
     private func publish() {
-        // The bands reflect the SPEAKER, not the whole mix: when the
-        // output targets another device — or the speaker's CoreAudio
-        // device is gone (powered off) — the equalizer dies. The gate
-        // reads open only without a configured speaker.
-        let gated = (speakerGate.isRunning(mac: macProvider()) ?? true)
-            ? monitor.snapshotBands()
-            : [Double](repeating: 0, count: AudioBands.bandCount)
-        let state = LiveState(
-            bands: gated,
-            updatedAt: Date())
+        let state = stateProvider()
         let encoder = PropertyListEncoder()
         encoder.outputFormat = .binary
         do {

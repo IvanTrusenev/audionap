@@ -70,9 +70,7 @@ struct AudioNapDaemon: ParsableCommand {
         }
 
         let publisher = StatePublisher(
-            monitor: systemAudio,
-            speakerGate: speakerGate,
-            macProvider: { loop.speakerMAC })
+            stateProvider: { loop.snapshotState() })
         publisher.start()
 
         loop.run()
