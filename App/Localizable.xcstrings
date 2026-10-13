@@ -429,6 +429,24 @@
         }
       }
     },
+    "log.jumpToTail": {
+      "comment": "The tooltip of the button that returns the log view to the latest entries.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jump to the latest entries"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "К новым записям"
+          }
+        }
+      }
+    },
     "log.older": {
       "comment": "The note at the top of the log tail when the file holds earlier entries.",
       "extractionState": "manual",

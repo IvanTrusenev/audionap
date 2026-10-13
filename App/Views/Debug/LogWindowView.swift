@@ -20,6 +20,8 @@ struct LogWindowView: View {
     /// Whether the tail is visible. Set by the bottom marker's
     /// appearance inside the lazy stack.
     @State private var followingTail = true
+    /// Hover state of the jump button.
+    @State private var jumpHovering = false
 
     private let bottomID = "bottom"
 
@@ -73,6 +75,11 @@ struct LogWindowView: View {
                     }
                 }
             }
+            .overlay(alignment: .bottom) {
+                if !followingTail {
+                    jumpButton(proxy: proxy)
+                }
+            }
         }
         // Minimums, not a hard frame: the window stretches with the
         // user, the scroll area takes whatever it is given.
@@ -84,6 +91,42 @@ struct LogWindowView: View {
     private func apply() {
         displayedLines = reader.lines
         displayedTruncated = reader.truncated
+    }
+
+    /// The "Jump to Now" affordance, in the Console style: appears
+    /// only while the follow is paused, says "you are not at the
+    /// tail", and returns to it in one click. Deliberately quiet at
+    /// rest — a floating convenience must not compete with the
+    /// content — and gains its emphasis on hover.
+    private func jumpButton(proxy: ScrollViewProxy) -> some View {
+        Button {
+            followingTail = true
+            apply()
+            proxy.scrollTo(bottomID, anchor: .bottom)
+        } label: {
+            Image(systemName: "arrow.down")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .padding(6)
+                .background(
+                    Circle()
+                        .fill(.regularMaterial)
+                        .overlay(
+                            Circle().strokeBorder(
+                                jumpHovering ? Color.primary.opacity(0.2) : .clear,
+                                lineWidth: 1)
+                        )
+                )
+                .shadow(radius: jumpHovering ? 4 : 2)
+                .scaleEffect(jumpHovering ? 1.05 : 1)
+        }
+        .buttonStyle(.plain)
+        .help("log.jumpToTail")
+        .onHover { jumpHovering = $0 }
+        .padding(.bottom, 8)
+        .transition(.opacity)
+        .animation(.easeOut(duration: 0.15), value: followingTail)
+        .animation(.easeOut(duration: 0.15), value: jumpHovering)
     }
 }
 
