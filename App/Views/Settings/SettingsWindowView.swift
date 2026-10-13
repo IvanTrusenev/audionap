@@ -6,6 +6,11 @@ import SwiftUI
 /// the shared ConfigStore and hot-reload the daemon. Restore Defaults
 /// resets timeouts and toggles but never the device: the device is a
 /// choice, not a setting.
+///
+/// A custom layout, not a native Form: the design's controls are
+/// full-width with the label above (sliders) or pinned right
+/// (toggles), and a grouped Form's column machinery squeezes them
+/// into the control column.
 struct SettingsWindowView: View {
     let store: ConfigStore
     let autostart: AutostartController
@@ -23,8 +28,8 @@ struct SettingsWindowView: View {
     @State private var showingAutostartError = false
 
     var body: some View {
-        Form {
-            Section("device.title") {
+        VStack(alignment: .leading, spacing: 0) {
+            section("device.title") {
                 // The mockup's one-line row: the picker and the
                 // refresh icon. The section header names the domain;
                 // the picker's hidden label still serves accessibility.
@@ -52,7 +57,8 @@ struct SettingsWindowView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Section("settings.timeouts") {
+            groupDivider
+            section("settings.timeouts") {
                 slider(
                     title: String(localized: "settings.silenceTimeout"),
                     binding: Binding(
@@ -70,7 +76,8 @@ struct SettingsWindowView: View {
                     range: AppConfig.inputWindowRange
                 )
             }
-            Section("settings.behavior") {
+            groupDivider
+            section("settings.behavior") {
                 toggleRow(
                     title: "settings.ignoreUserActivity",
                     isOn: Binding(
@@ -106,23 +113,23 @@ struct SettingsWindowView: View {
                     )
                 )
             }
-            Section {
-                Button("settings.restoreDefaults") {
-                    store.resetDefaults()
-                    launchAtLogin = false
-                    Task {
-                        do {
-                            try await autostart.setEnabled(false)
-                        } catch {
-                            launchAtLogin = AutostartController.isEnabled()
-                            autostartErrorMessage = error.localizedDescription
-                            showingAutostartError = true
-                        }
+            groupDivider
+            Button("settings.restoreDefaults") {
+                store.resetDefaults()
+                launchAtLogin = false
+                Task {
+                    do {
+                        try await autostart.setEnabled(false)
+                    } catch {
+                        launchAtLogin = AutostartController.isEnabled()
+                        autostartErrorMessage = error.localizedDescription
+                        showingAutostartError = true
                     }
                 }
             }
+            .buttonStyle(HoverButtonStyle())
         }
-        .formStyle(.grouped)
+        .padding(12)
         .frame(width: 380)
         .background(WindowCapture(onWindow: { presenter.capture($0, as: .settings) }))
         .task {
@@ -136,6 +143,24 @@ struct SettingsWindowView: View {
         } message: {
             Text(autostartErrorMessage)
         }
+    }
+
+    /// A group: the macOS header style (small caps caption) over the
+    /// group's content.
+    private func section(
+        _ title: LocalizedStringKey, @ViewBuilder content: () -> some View
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption)
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
+            content()
+        }
+    }
+
+    private var groupDivider: some View {
+        Divider().padding(.vertical, 10)
     }
 
     /// Picker selection writes straight into the config store — the
@@ -184,17 +209,21 @@ struct SettingsWindowView: View {
     /// AppConfig — product limits live in one place.
     /// The label is one localized template with two placeholders (title and
     /// minute count), so the word order can differ per language.
+    /// The row and the slider stretch to the full width — a grouped form
+    /// would otherwise squeeze the slider into the control column.
     private func slider(
         title: String, binding: Binding<Double>, range: ClosedRange<Int>
     ) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("settings.timeoutValue \(title) \(Int(binding.wrappedValue))")
             Slider(
                 value: binding,
                 in: Double(range.lowerBound)...Double(range.upperBound),
                 step: 1
             )
+            .frame(maxWidth: .infinity)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
