@@ -56,6 +56,31 @@ public final class ConfigStore {
         }
     }
 
+    /// Whether the daemon disconnects only a battery-powered speaker.
+    /// Persisted on every write, hot-reloaded like every setting.
+    public var speakerOnBattery: Bool {
+        get { config.speakerOnBattery }
+        set {
+            config.speakerOnBattery = newValue
+            persist()
+        }
+    }
+
+    /// The same windows in seconds — for the UI, converted in exactly
+    /// one place (AppConfig).
+    public var silenceTimeoutSeconds: Int { config.silenceTimeoutSeconds }
+    public var inputWindowSeconds: Int { config.inputWindowSeconds }
+
+    /// Restores the defaults: timeouts and toggles. The selected
+    /// device is not touched — it is a choice, not a setting to reset.
+    public func resetDefaults() {
+        config.silenceTimeoutMinutes = AppConfig.defaultSilenceTimeoutMinutes
+        config.inputWindowMinutes = AppConfig.defaultInputWindowMinutes
+        config.ignoreUserActivity = false
+        config.speakerOnBattery = AppConfig.defaultSpeakerOnBattery
+        persist()
+    }
+
     private func persist() {
         do {
             try config.save(to: Paths.configURL)

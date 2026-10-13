@@ -2,24 +2,25 @@ import AppKit
 import SwiftUI
 
 /// The menu bar window: assembles the app's widgets — the daemon status
-/// and control row, settings, the log tail, and Quit. The widgets own
-/// their internals; this view only arranges them.
+/// and control row, the signal slot, the device row, and Quit. The
+/// widgets own their internals; this view only arranges them.
 struct ContentView: View {
+    /// The config store is shared with the settings window — injected
+    /// from the app, not owned here.
+    let store: ConfigStore
+    /// Shared with the settings window for the launch-at-login toggle.
+    let autostart: AutostartController
+
     /// Owns the view model for the app's lifetime. `@State` creates it once
     /// and keeps it across redraws; `DaemonController` is `@Observable`, so
     /// SwiftUI re-renders this view when a property it read in `body` changes.
     @State private var controller = DaemonController()
-    /// Config: reads config.plist once, saves every slider change.
-    @State private var store = ConfigStore()
 
     /// Tail of daemon.log, refreshed on appear and by the Refresh button.
     @State private var logReader = LogReader()
 
     /// Provisions the bundled daemon on first window open.
     @State private var installer = DaemonInstaller()
-
-    /// Manages the LaunchAgents copy that enables launch-at-login.
-    @State private var autostart = AutostartController()
 
     /// The daemon's live state (equalizer bands), refreshed on a timer
     /// while the window is open.
@@ -29,6 +30,8 @@ struct ContentView: View {
     @State private var installErrorMessage = ""
 
     @State private var showingInstallError = false
+
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -42,19 +45,20 @@ struct ContentView: View {
                     playing: stateReader.playing,
                     quietSeconds: stateReader.quietSeconds,
                     idleSeconds: stateReader.idleSeconds,
-                    silenceTimeoutSeconds: stateReader.silenceTimeoutSeconds,
-                    inputWindowSeconds: stateReader.inputWindowSeconds,
+                    // The thresholds are config, not runtime state: the
+                    // store is their fresher truth than the daemon's
+                    // publication round-trip.
+                    silenceTimeoutSeconds: store.silenceTimeoutSeconds,
+                    inputWindowSeconds: store.inputWindowSeconds,
                     ignoreIdle: store.ignoreUserActivity)
             }
             Divider()
             DeviceSection(store: store)
             Divider()
-            SettingsControls(store: store, autostart: autostart)
             #if DEBUG
-            Divider()
             LogSection(reader: logReader)
-            #endif
             Divider()
+            #endif
             quitRow
         }
         .padding()
@@ -90,22 +94,30 @@ struct ContentView: View {
     }
 
     /// A window-style MenuBarExtra has no application menu, so the window
-    /// needs its own Quit button.
+    /// needs its own Quit button. The settings gear is a temporary
+    /// trigger for the new window — the final bottom row arrives with
+    /// the next stage.
     private var quitRow: some View {
         HStack {
             Spacer()
+            Button {
+                openWindow(id: "settings")
+            } label: {
+                Image(systemName: "gearshape")
+            }
+            .buttonStyle(.borderless)
             Button("action.quit") { NSApplication.shared.terminate(nil) }
         }
     }
 }
 
 #Preview("Light") {
-    ContentView()
+    ContentView(store: ConfigStore(), autostart: AutostartController())
         .appTheme(.standard)
 }
 
 #Preview("Dark") {
-    ContentView()
+    ContentView(store: ConfigStore(), autostart: AutostartController())
         .appTheme(.standard)
         .preferredColorScheme(.dark)
 }

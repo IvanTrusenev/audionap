@@ -447,6 +447,24 @@
         }
       }
     },
+    "settings.behavior": {
+      "comment": "The header of the behavior group in the settings window.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Behavior"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поведение"
+          }
+        }
+      }
+    },
     "settings.idleWindow": {
       "comment": "The title of the idle window slider.",
       "extractionState": "manual",
@@ -501,6 +519,24 @@
         }
       }
     },
+    "settings.restoreDefaults": {
+      "comment": "The button that restores the default settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore Defaults"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить настройки"
+          }
+        }
+      }
+    },
     "settings.silenceTimeout": {
       "comment": "The title of the silence timeout slider.",
       "extractionState": "manual",
@@ -519,6 +555,24 @@
         }
       }
     },
+    "settings.speakerOnBattery": {
+      "comment": "The toggle that limits disconnects to battery-powered speakers: off means the speaker is on wall power and is never disconnected.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disconnect only while on battery"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отключать только на батарейке"
+          }
+        }
+      }
+    },
     "settings.timeoutValue %@ %lld": {
       "comment": "A slider label: the first argument is the setting's title, the second is its current value in minutes.",
       "extractionState": "manual",
@@ -533,6 +587,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@: %2$lld мин"
+          }
+        }
+      }
+    },
+    "settings.timeouts": {
+      "comment": "The header of the timeouts group in the settings window.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timeouts"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Таймауты"
+          }
+        }
+      }
+    },
+    "settings.window.title": {
+      "comment": "The title of the settings window.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AudioNap Settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки AudioNap"
           }
         }
       }

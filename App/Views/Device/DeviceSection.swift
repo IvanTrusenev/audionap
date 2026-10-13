@@ -1,79 +1,53 @@
 import Shared
 import SwiftUI
 
-/// The device picker: the speaker AudioNap babysits. The list comes from
-/// `blueutil --paired` (connected devices first); the manual field is
-/// always available — the fallback when blueutil or the device list is
-/// unavailable.
+/// The speaker row in the popup: the device name (falling back to the
+/// MAC) and the connect/disconnect toggle. The picker and the list
+/// refresh live in the settings window; the popup only displays and
+/// toggles.
 struct DeviceSection: View {
     let store: ConfigStore
 
+    /// The paired list, only to resolve the selected MAC into a name.
     @State private var devices: [BlueutilDevice] = []
-    /// Manual MAC entry — a draft, committed to the store on submit.
-    @State private var manualInput = ""
-    /// True when the last submit was not a MAC address.
-    @State private var showingInvalidHint = false
-    /// Text of the last reconnect failure, shown in an alert.
-    @State private var errorMessage = ""
-    /// Whether the error alert is visible.
-    @State private var showingError = false
     /// Last known connection state; refreshed on open, after each
     /// action, and by a poll while the window is open.
     @State private var isConnected = false
     /// True while a connect/disconnect operation is in flight.
     @State private var isUpdatingConnection = false
-    /// Verbatim empty title — a literal "" would become a localization key.
-    private let emptyTitle = ""
+    /// Text of the last reconnect failure, shown in an alert.
+    @State private var errorMessage = ""
+    /// Whether the error alert is visible.
+    @State private var showingError = false
 
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text("device.title").font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Button("action.refresh") { refresh() }
-                Button {
-                    performToggle()
-                } label: {
-                    HStack(spacing: 6) {
-                        if isUpdatingConnection {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Image(systemName: "antenna.radiowaves.left.and.right")
-                        }
-                        Text(isConnected ? "action.disconnect" : "action.connect")
+        HStack {
+            Text(verbatim: displayName)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button {
+                performToggle()
+            } label: {
+                HStack(spacing: 6) {
+                    if isUpdatingConnection {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "antenna.radiowaves.left.and.right")
                     }
-                    .foregroundStyle(isConnected ? theme.statusInactive : theme.statusActive)
+                    Text(isConnected ? "action.disconnect" : "action.connect")
                 }
-                .disabled(store.speakerMAC == nil || isUpdatingConnection)
+                .foregroundStyle(isConnected ? theme.statusInactive : theme.statusActive)
             }
-            Picker("device.title", selection: selectedMAC) {
-                Text("device.none").tag(BluetoothMAC?.none)
-                ForEach(sortedDevices, id: \.address) { device in
-                    Text(verbatim: "\(device.name) — \(device.address)")
-                        .tag(BluetoothMAC?.some(device.address))
-                }
-            }
-            .labelsHidden()
-            if sortedDevices.isEmpty {
-                Text("device.empty").font(.caption).foregroundStyle(.secondary)
-            }
-            TextField(emptyTitle, text: $manualInput, prompt: Text(verbatim: "aa-bb-cc-dd-ee-ff"))
-                .onSubmit(submitManual)
-            if showingInvalidHint {
-                Text("device.invalidMAC").font(.caption).foregroundStyle(.secondary)
-            }
+            .disabled(store.speakerMAC == nil || isUpdatingConnection)
         }
         .task {
             await reloadDevices()
             await refreshConnectionState()
             await pollConnectionState()
-        }
-        .onChange(of: store.speakerMAC) { _, newValue in
-            manualInput = newValue?.description ?? ""
-            showingInvalidHint = false
         }
         .alert("error.title", isPresented: $showingError) {
             Button("action.ok") {}
@@ -82,41 +56,21 @@ struct DeviceSection: View {
         }
     }
 
-    /// Picker selection writes straight into the config store — the
-    /// daemon hot-reloads, the manual field mirrors it.
-    private var selectedMAC: Binding<BluetoothMAC?> {
-        Binding(
-            get: { store.speakerMAC },
-            set: { store.speakerMAC = $0 }
-        )
-    }
-
-    /// Connected devices first — the speaker being set up is usually
-    /// connected — then by name.
-    private var sortedDevices: [BlueutilDevice] {
-        devices.sorted {
-            ($0.connected ? 0 : 1, $0.name) < ($1.connected ? 0 : 1, $1.name)
+    /// The selected device's name, falling back to the MAC — the
+    /// design's read-only display.
+    private var displayName: String {
+        let title = String(localized: "device.title")
+        guard let mac = store.speakerMAC else {
+            return "\(title): \(String(localized: "device.none"))"
         }
-    }
-
-    private func refresh() {
-        Task { await reloadDevices() }
+        let name = devices.first(where: { $0.address == mac })?.name ?? mac.description
+        return "\(title): \(name)"
     }
 
     private func reloadDevices() async {
         devices = await BlueutilRunner.pairedDevices()
     }
 
-    /// Commits the manual entry when it normalizes to a MAC; otherwise
-    /// shows the hint and keeps the stored value untouched.
-    private func submitManual() {
-        guard let normalized = BluetoothMAC(manualInput) else {
-            showingInvalidHint = true
-            return
-        }
-        store.speakerMAC = normalized
-    }
-    
     /// Re-reads the connection state from blueutil; no-op without a
     /// selected device.
     private func refreshConnectionState() async {
