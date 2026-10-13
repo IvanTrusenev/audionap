@@ -10,6 +10,8 @@ struct ContentView: View {
     let store: ConfigStore
     /// Shared with the settings window for the launch-at-login toggle.
     let autostart: AutostartController
+    /// Fronts the settings window on repeated clicks.
+    let windowPresenter: SettingsWindowPresenter
 
     /// Owns the view model for the app's lifetime. `@State` creates it once
     /// and keeps it across redraws; `DaemonController` is `@Observable`, so
@@ -102,6 +104,7 @@ struct ContentView: View {
             Spacer()
             Button {
                 openWindow(id: "settings")
+                windowPresenter.front()
             } label: {
                 Image(systemName: "gearshape")
             }
@@ -112,12 +115,18 @@ struct ContentView: View {
 }
 
 #Preview("Light") {
-    ContentView(store: ConfigStore(), autostart: AutostartController())
+    ContentView(
+        store: ConfigStore(),
+        autostart: AutostartController(),
+        windowPresenter: SettingsWindowPresenter())
         .appTheme(.standard)
 }
 
 #Preview("Dark") {
-    ContentView(store: ConfigStore(), autostart: AutostartController())
+    ContentView(
+        store: ConfigStore(),
+        autostart: AutostartController(),
+        windowPresenter: SettingsWindowPresenter())
         .appTheme(.standard)
         .preferredColorScheme(.dark)
 }
