@@ -18,4 +18,13 @@ public enum LogTailParser {
         }
         return Array(lines.suffix(limit))
     }
+
+    /// Drops everything through the first newline — a caller that cut
+    /// the data mid-line (the backwards tail readers) would otherwise
+    /// show a partial first line. Data without a newline passes
+    /// through unchanged.
+    public static func lineAligned(_ data: Data) -> Data {
+        guard let newline = data.firstIndex(of: 0x0A) else { return data }
+        return data.subdata(in: (newline + 1)..<data.count)
+    }
 }

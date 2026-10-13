@@ -72,7 +72,7 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
         self.stream = stream
         isRunning = true
         lastError = nil
-        DaemonLog.print("audio capture: active — universal playing signal")
+        DaemonLog.print(.cap, "capture: universal signal active")
     }
 
     /// Stops the capture.
@@ -96,7 +96,7 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
            now - lastBufferAt > ActivityWindow.defaultWindowDuration {
             isRunning = false
             lastError = "capture stalled — legacy signals"
-            DaemonLog.print("audio capture: stalled — legacy signals")
+            DaemonLog.print(.warn, "capture stalled — legacy signals")
             return nil
         }
         return window.isPlaying(at: now)
@@ -158,7 +158,7 @@ public final class SystemAudioMonitor: NSObject, SCStreamOutput {
             if !formatIsFloat32 {
                 isRunning = false
                 lastError = "unexpected audio format — legacy signals"
-                DaemonLog.print("audio capture: unexpected format — legacy signals")
+                DaemonLog.print(.warn, "capture format unexpected — legacy signals")
                 return
             }
             sampleRate = asbd.pointee.mSampleRate

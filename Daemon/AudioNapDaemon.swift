@@ -60,7 +60,8 @@ struct AudioNapDaemon: ParsableCommand {
                 try await systemAudio.start()
             } catch {
                 DaemonLog.print(
-                    "audio capture: unavailable — legacy playing signals (\(String(describing: error)))")
+                    .warn,
+                    "capture unavailable — legacy signals (\(String(describing: error)))")
             }
         }
 
@@ -78,12 +79,15 @@ struct AudioNapDaemon: ParsableCommand {
             stateProvider: { loop.snapshotState() })
         publisher.start()
 
+        let rotator = LogRotator()
+        rotator.start()
+
         loop.run()
         publisher.stop()
         // Best-effort cleanup — the capture dies with the process anyway.
         Task { await systemAudio.stop() }
         // A marker in the log that the daemon exited on its own — a
         // SIGKILL from launchd's exit-timeout leaves no such line.
-        DaemonLog.print("stopped cleanly")
+        DaemonLog.print(.bye, "stopped cleanly")
     }
 }

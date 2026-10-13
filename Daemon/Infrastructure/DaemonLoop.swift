@@ -67,7 +67,7 @@ public final class DaemonLoop {
         guard let connected = bluetooth.isConnected(to: mac) else {
             blueutilFailures += 1
             if blueutilFailures == 1 {
-                DaemonLog.print("blueutil launch failed — counting failures")
+                DaemonLog.print(.warn, "blueutil launch failed — counting failures")
             }
             if blueutilFailures == Self.blueutilFailureThreshold {
                 // Forensic evidence before the exit: the open-fd count in
@@ -76,7 +76,8 @@ public final class DaemonLoop {
                 // logs — a dead process can't be autopsied afterwards.
                 let fdCount = (try? FileManager.default.contentsOfDirectory(atPath: "/dev/fd").count) ?? -1
                 DaemonLog.print(
-                    "ERROR: blueutil unreachable for \(Self.blueutilFailureThreshold) steps (open fds: \(fdCount)) — exiting so launchd restarts a fresh process"
+                    .warn,
+                    "blueutil unreachable for \(Self.blueutilFailureThreshold) steps (open fds: \(fdCount)) — exiting so launchd restarts a fresh process"
                 )
                 if let lsof = ProcessRunner.run(executable: "/usr/sbin/lsof", arguments: ["-p", String(getpid())]) {
                     try? lsof.stdout.write(
@@ -93,7 +94,7 @@ public final class DaemonLoop {
             quietSeconds = 0
             waitingSteps += 1
             if waitingSteps == 1 || waitingSteps.isMultiple(of: Self.waitingPingEvery) {
-                DaemonLog.print("waiting for reconnect (step \(waitingSteps))")
+                DaemonLog.print(.ok, "waiting for reconnect (step \(waitingSteps))")
             }
             return
         }
@@ -119,9 +120,24 @@ public final class DaemonLoop {
         if decision.shouldDisconnect {
             try? bluetooth.disconnect(mac)
             quietSeconds = 0
+            DaemonLog.print(
+                .act, "disconnect: silence \(quietAtDecision)s + idle \(idleSeconds)s")
+        } else {
+            DaemonLog.print(
+                .ok,
+                "\(stayText(decision)) (quiet \(quietAtDecision)s, idle \(idleSeconds)s)")
         }
+    }
 
-        DaemonLog.print("step: \(decision) quiet=\(quietAtDecision)s idle=\(idleSeconds)s")
+    /// The human form of a stay decision — no Swift types in the log.
+    private func stayText(_ decision: DaemonDecision) -> String {
+        guard case .stayConnected(let reason) = decision else { return "quiet" }
+        switch reason {
+        case .playing: return "playing"
+        case .speakerOnPower: return "quiet, speaker on power"
+        case .idleTooShort: return "quiet, user active"
+        case .silenceTooShort: return "quiet"
+        }
     }
 
     /// The playing rule shared by the decision step and the state
@@ -168,7 +184,8 @@ public final class DaemonLoop {
         guard config != self.config else { return }
         self.config = config
         DaemonLog.print(
-            "config reloaded: speaker=\(config.speakerMAC?.description ?? "none") silence=\(config.silenceTimeoutMinutes)m input=\(config.inputWindowMinutes)m ignoreActivity=\(config.ignoreUserActivity)"
+            .cfg,
+            "config reloaded: silence \(config.silenceTimeoutMinutes)m, input \(config.inputWindowMinutes)m, ignoreActivity \(config.ignoreUserActivity ? "on" : "off")"
         )
     }
 

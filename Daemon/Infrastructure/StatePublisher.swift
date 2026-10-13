@@ -54,7 +54,7 @@ public final class StatePublisher {
         } catch {
             if !failureLogged {
                 DaemonLog.print(
-                    "state publish failed: \(String(describing: error))")
+                    .warn, "state publish failed: \(String(describing: error))")
                 failureLogged = true
             }
         }

@@ -28,42 +28,25 @@ public final class LogReader {
 
     /// Re-reads the tail. A missing file yields no lines — the daemon has
     /// never logged yet — and the window shows an empty state, not an error.
+    /// State is assigned only on an actual change: @Observable publishes
+    /// on assignment, and a redundant re-render every poll made the
+    /// lazy scroll view jitter while the user read older lines.
     public func refresh() {
         let tail = readTail()
+        guard tail.lines != lines || tail.truncated != truncated else { return }
         lines = tail.lines
         truncated = tail.truncated
     }
 
-    /// Walks the file backwards: read the last chunk, keep prepending
-    /// chunks until `byteLimit` bytes are collected or the start is hit.
+    /// Walks the file backwards through the shared tail reader; the
+    /// cut lands mid-line, so the partial first line is dropped.
     private func readTail() -> (lines: [String], truncated: Bool) {
-        guard let handle = try? FileHandle(forReadingFrom: logURL) else {
+        guard let tail = LogTailReader.readTail(from: logURL, byteLimit: Self.byteLimit)
+        else {
             return ([], false)
         }
-        defer { try? handle.close() }
-
-        let chunkSize = 8_192
-        var offset = (try? handle.seekToEnd()) ?? 0
-        var collected = Data()
-
-        while true {
-            let readStart = offset >= chunkSize ? offset - UInt64(chunkSize) : 0
-            try? handle.seek(toOffset: readStart)
-            let chunk = handle.readDataToEndOfFile()
-            collected = chunk + collected
-            guard collected.count >= Self.byteLimit || readStart == 0 else {
-                offset = readStart
-                continue
-            }
-
-            var data = Data(collected.suffix(Self.byteLimit))
-            // The cut lands mid-line; drop the partial first line so
-            // the window starts clean at a line boundary.
-            if let newline = data.firstIndex(of: 0x0A) {
-                data = data.subdata(in: (newline + 1)..<data.count)
-            }
-            let lines = LogTailParser.lastLines(in: data, limit: Int.max)
-            return (lines, truncated: offset > 0)
-        }
+        let data = LogTailParser.lineAligned(tail.data)
+        let lines = LogTailParser.lastLines(in: data, limit: Int.max)
+        return (lines, tail.truncated)
     }
 }

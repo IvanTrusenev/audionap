@@ -32,4 +32,19 @@ struct LogTailParserTests {
         let data = Data("one\n\ntwo\n".utf8)
         #expect(LogTailParser.lastLines(in: data, limit: 5) == ["one", "", "two"])
     }
+
+    @Test func lineAlignedDropsThePartialFirstLine() {
+        let data = Data("partial\none\ntwo\n".utf8)
+        #expect(LogTailParser.lineAligned(data) == Data("one\ntwo\n".utf8))
+    }
+
+    @Test func lineAlignedWithoutNewlinePassesThrough() {
+        let data = Data("no newline anywhere".utf8)
+        #expect(LogTailParser.lineAligned(data) == data)
+    }
+
+    @Test func lineAlignedStartingAtNewlineDropsIt() {
+        let data = Data("\none\n".utf8)
+        #expect(LogTailParser.lineAligned(data) == Data("one\n".utf8))
+    }
 }
