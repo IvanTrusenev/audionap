@@ -59,59 +59,69 @@ struct SettingsWindowView: View {
             }
             groupDivider
             section("settings.timeouts") {
-                slider(
-                    title: String(localized: "settings.silenceTimeout"),
-                    binding: Binding(
-                        get: { Double(store.silenceTimeoutMinutes) },
-                        set: { store.silenceTimeoutMinutes = Int($0) }
-                    ),
-                    range: AppConfig.silenceTimeoutRange
-                )
-                slider(
-                    title: String(localized: "settings.idleWindow"),
-                    binding: Binding(
-                        get: { Double(store.inputWindowMinutes) },
-                        set: { store.inputWindowMinutes = Int($0) }
-                    ),
-                    range: AppConfig.inputWindowRange
-                )
+                VStack(spacing: 0) {
+                    slider(
+                        title: String(localized: "settings.silenceTimeout"),
+                        binding: Binding(
+                            get: { Double(store.silenceTimeoutMinutes) },
+                            set: { store.silenceTimeoutMinutes = Int($0) }
+                        ),
+                        range: AppConfig.silenceTimeoutRange
+                    )
+                    Divider().padding(.vertical, 8)
+                    slider(
+                        title: String(localized: "settings.idleWindow"),
+                        binding: Binding(
+                            get: { Double(store.inputWindowMinutes) },
+                            set: { store.inputWindowMinutes = Int($0) }
+                        ),
+                        range: AppConfig.inputWindowRange
+                    )
+                }
             }
             groupDivider
             section("settings.behavior") {
-                toggleRow(
-                    title: "settings.ignoreUserActivity",
-                    isOn: Binding(
-                        get: { store.ignoreUserActivity },
-                        set: { store.ignoreUserActivity = $0 }
+                VStack(spacing: 0) {
+                    toggleRow(
+                        title: "settings.ignoreUserActivity",
+                        isOn: Binding(
+                            get: { store.ignoreUserActivity },
+                            set: { store.ignoreUserActivity = $0 }
+                        )
                     )
-                )
-                toggleRow(
-                    title: "settings.speakerOnBattery",
-                    isOn: Binding(
-                        get: { store.speakerOnBattery },
-                        set: { store.speakerOnBattery = $0 }
+                    .padding(.vertical, 4)
+                    Divider()
+                    toggleRow(
+                        title: "settings.speakerOnBattery",
+                        isOn: Binding(
+                            get: { store.speakerOnBattery },
+                            set: { store.speakerOnBattery = $0 }
+                        )
                     )
-                )
-                toggleRow(
-                    title: "settings.launchAtLogin",
-                    isOn: Binding(
-                        get: { launchAtLogin },
-                        set: { newValue in
-                            launchAtLogin = newValue
-                            Task {
-                                do {
-                                    try await autostart.setEnabled(newValue)
-                                } catch {
-                                    // The filesystem is the truth: re-read it
-                                    // so the toggle snaps back honestly.
-                                    launchAtLogin = AutostartController.isEnabled()
-                                    autostartErrorMessage = error.localizedDescription
-                                    showingAutostartError = true
+                    .padding(.vertical, 4)
+                    Divider()
+                    toggleRow(
+                        title: "settings.launchAtLogin",
+                        isOn: Binding(
+                            get: { launchAtLogin },
+                            set: { newValue in
+                                launchAtLogin = newValue
+                                Task {
+                                    do {
+                                        try await autostart.setEnabled(newValue)
+                                    } catch {
+                                        // The filesystem is the truth: re-read it
+                                        // so the toggle snaps back honestly.
+                                        launchAtLogin = AutostartController.isEnabled()
+                                        autostartErrorMessage = error.localizedDescription
+                                        showingAutostartError = true
+                                    }
                                 }
                             }
-                        }
+                        )
                     )
-                )
+                    .padding(.vertical, 4)
+                }
             }
             groupDivider
             Button("settings.restoreDefaults") {
@@ -146,7 +156,8 @@ struct SettingsWindowView: View {
     }
 
     /// A group: the macOS header style (small caps caption) over the
-    /// group's content.
+    /// group's content, wrapped in the inset container of the modern
+    /// System Settings look.
     private func section(
         _ title: LocalizedStringKey, @ViewBuilder content: () -> some View
     ) -> some View {
@@ -156,6 +167,12 @@ struct SettingsWindowView: View {
                 .textCase(.uppercase)
                 .foregroundStyle(.secondary)
             content()
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(.quaternary)
+                )
         }
     }
 
