@@ -1,11 +1,14 @@
 import SwiftUI
 
-/// Daemon status and the one control in a single row: dot + state text +
-/// refresh icon on the left, the start/stop toggle on the right. The
-/// toggle stays pinned right — state text changes do not move it.
+/// Daemon status and the one control in a single row: dot + state text
+/// on the left, the start/stop toggle on the right. The toggle stays
+/// pinned right — state text changes do not move it.
 /// Owns its own error alert: only this row produces daemon control errors.
 struct ControlRow: View {
     let controller: DaemonController
+    /// The heartbeat truth from StateReader — the settled status comes
+    /// from the daemon's own publication, not from launchctl readings.
+    let daemonAlive: Bool
 
     /// Text of the last Start/Stop failure, shown in an alert.
     @State private var errorMessage = ""
@@ -20,13 +23,6 @@ struct ControlRow: View {
                 .fill(stateColor)
                 .frame(width: 8, height: 8)
             Text(statusText)
-            Button {
-                controller.refreshStatus()
-            } label: {
-                Image(systemName: "arrow.clockwise")
-            }
-            .buttonStyle(.borderless)
-            .help("action.refresh")
             Spacer()
             toggleButton
         }
@@ -37,10 +33,20 @@ struct ControlRow: View {
         }
     }
 
+    /// The status the row shows: a local transition while an operation
+    /// is in flight, otherwise the heartbeat truth — an externally
+    /// stopped daemon reads as stopped within the heartbeat's
+    /// freshness window, without any refresh.
+    private var displayedStatus: DaemonStatus {
+        controller.status.isTransitioning
+            ? controller.status
+            : (daemonAlive ? .running : .stopped)
+    }
+
     /// Semantic color per daemon state: active, inactive, or neutral
     /// while an operation is in flight.
     private var stateColor: Color {
-        switch controller.status {
+        switch displayedStatus {
         case .running: theme.statusActive
         case .stopped: theme.statusInactive
         case .starting, .stopping: theme.statusTransitioning
@@ -51,7 +57,7 @@ struct ControlRow: View {
     /// plain String variable would hit `Text(verbatim:)` and skip
     /// localization.
     private var statusText: LocalizedStringKey {
-        switch controller.status {
+        switch displayedStatus {
         case .running: "status.daemon.running"
         case .stopped: "status.daemon.stopped"
         case .starting: "status.daemon.starting"
@@ -63,7 +69,7 @@ struct ControlRow: View {
     /// starting is a positive action (active), stopping a negative one
     /// (inactive), transitions are neutral.
     private var actionColor: Color {
-        switch controller.status {
+        switch displayedStatus {
         case .running: theme.statusInactive
         case .stopped: theme.statusActive
         case .starting, .stopping: theme.statusTransitioning
@@ -71,7 +77,7 @@ struct ControlRow: View {
     }
 
     private var buttonTitle: LocalizedStringKey {
-        switch controller.status {
+        switch displayedStatus {
         case .running: "action.stop"
         case .stopped: "action.start"
         case .starting: "status.daemon.starting"
@@ -84,7 +90,11 @@ struct ControlRow: View {
     private var toggleButton: some View {
         Button {
             perform {
-                if controller.status == .running {
+                // The local machine may lag the heartbeat (an external
+                // stop), so sync it first — the transition must start
+                // from the truth.
+                controller.adopt(alive: daemonAlive)
+                if displayedStatus == .running {
                     try await controller.stop()
                 } else {
                     try await controller.start()
@@ -96,7 +106,7 @@ struct ControlRow: View {
                     ProgressView()
                         .controlSize(.small)
                 } else {
-                    Image(systemName: controller.status == .running ? "stop.fill" : "play.fill")
+                    Image(systemName: displayedStatus == .running ? "stop.fill" : "play.fill")
                 }
                 Text(buttonTitle)
             }
@@ -121,19 +131,19 @@ struct ControlRow: View {
 }
 
 #Preview("Stopped") {
-    ControlRow(controller: DaemonController(status: .stopped))
+    ControlRow(controller: DaemonController(status: .stopped), daemonAlive: false)
         .appTheme(.standard)
         .padding()
 }
 
 #Preview("Running") {
-    ControlRow(controller: DaemonController(status: .running))
+    ControlRow(controller: DaemonController(status: .running), daemonAlive: true)
         .appTheme(.standard)
         .padding()
 }
 
 #Preview("Transition") {
-    ControlRow(controller: DaemonController(status: .starting))
+    ControlRow(controller: DaemonController(status: .starting), daemonAlive: false)
         .appTheme(.standard)
         .padding()
 }

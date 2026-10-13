@@ -32,7 +32,7 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ControlRow(controller: controller)
+            ControlRow(controller: controller, daemonAlive: stateReader.daemonAlive)
             EqualizerView(bands: stateReader.bands)
             Divider()
             DeviceSection(store: store)

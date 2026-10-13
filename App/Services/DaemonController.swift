@@ -31,6 +31,20 @@ public final class DaemonController {
         settle()
     }
 
+    /// Syncs the settled state with the heartbeat before an operation —
+    /// an external stop/start leaves the local machine stale, and the
+    /// next transition must start from the truth, not from memory.
+    /// No-op while an operation is in flight.
+    public func adopt(alive: Bool) {
+        guard !status.isTransitioning else { return }
+        if alive, status == .stopped {
+            status = .running
+        }
+        if !alive, status == .running {
+            status = .stopped
+        }
+    }
+
     /// Whether the agent is currently running, per launchd.
     nonisolated static func isAgentRunning() -> Bool {
         let result = runLaunchctl(arguments: ["print", "\(domain)/\(label)"])
