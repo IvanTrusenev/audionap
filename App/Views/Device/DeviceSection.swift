@@ -23,26 +23,33 @@ struct DeviceSection: View {
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        HStack {
-            Text(verbatim: displayName)
+        VStack(alignment: .leading, spacing: 3) {
+            Text("device.title")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Spacer()
-            Button {
-                performToggle()
-            } label: {
-                HStack(spacing: 6) {
-                    if isUpdatingConnection {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Image(systemName: "antenna.radiowaves.left.and.right")
+            HStack {
+                // One line, tail-truncated: a long device name ends
+                // with an ellipsis instead of wrapping the section.
+                Text(verbatim: deviceName)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Spacer()
+                Button {
+                    performToggle()
+                } label: {
+                    HStack(spacing: 6) {
+                        if isUpdatingConnection {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "antenna.radiowaves.left.and.right")
+                        }
+                        Text(isConnected ? "action.disconnect" : "action.connect")
                     }
-                    Text(isConnected ? "action.disconnect" : "action.connect")
+                    .foregroundStyle(isConnected ? theme.statusInactive : theme.statusActive)
                 }
-                .foregroundStyle(isConnected ? theme.statusInactive : theme.statusActive)
+                .disabled(store.speakerMAC == nil || isUpdatingConnection)
             }
-            .disabled(store.speakerMAC == nil || isUpdatingConnection)
         }
         .task {
             await reloadDevices()
@@ -58,13 +65,11 @@ struct DeviceSection: View {
 
     /// The selected device's name, falling back to the MAC — the
     /// design's read-only display.
-    private var displayName: String {
-        let title = String(localized: "device.title")
+    private var deviceName: String {
         guard let mac = store.speakerMAC else {
-            return "\(title): \(String(localized: "device.none"))"
+            return String(localized: "device.none")
         }
-        let name = devices.first(where: { $0.address == mac })?.name ?? mac.description
-        return "\(title): \(name)"
+        return devices.first(where: { $0.address == mac })?.name ?? mac.description
     }
 
     private func reloadDevices() async {
