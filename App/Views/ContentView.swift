@@ -33,7 +33,18 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ControlRow(controller: controller, daemonAlive: stateReader.daemonAlive)
-            EqualizerView(bands: stateReader.bands)
+            // The signal slot exists only while the daemon is alive —
+            // a stopped daemon hides it and the dividers collapse into
+            // one instead of stacking two in a row.
+            if stateReader.daemonAlive {
+                SignalSection(
+                    bands: stateReader.bands,
+                    playing: stateReader.playing,
+                    quietSeconds: stateReader.quietSeconds,
+                    idleSeconds: stateReader.idleSeconds,
+                    silenceTimeoutSeconds: stateReader.silenceTimeoutSeconds,
+                    inputWindowSeconds: stateReader.inputWindowSeconds)
+            }
             Divider()
             DeviceSection(store: store)
             Divider()

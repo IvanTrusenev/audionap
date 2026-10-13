@@ -9,8 +9,10 @@ struct EqualizerView: View {
     @Environment(\.appTheme) private var theme
 
     /// Bar geometry: twice the old strip, built from VU-meter bricks —
-    /// 9 segments × 4 pt with 1 pt gaps fill 44 pt exactly.
-    private static let maxHeight: CGFloat = 44
+    /// 9 segments × 4 pt with 1 pt gaps fill 44 pt exactly. Internal:
+    /// it is also the fixed height of the signal slot — both slot
+    /// modes share it so the switch never resizes the popup.
+    static let maxHeight: CGFloat = 44
     private static let segmentCount = 9
     private static let segmentHeight: CGFloat = 4
     private static let segmentGap: CGFloat = 1
