@@ -4,14 +4,24 @@ import Testing
 
 struct DaemonDecisionTests {
 
+    /// A config with explicit 3-minute windows — scenario inputs, not
+    /// the production defaults (which may move without these tests
+    /// having to notice).
+    private var threeMinuteConfig: AppConfig {
+        var config = AppConfig()
+        config.silenceTimeoutMinutes = 3
+        config.inputWindowMinutes = 3
+        return config
+    }
+
     // MARK: - Disconnect scenarios
 
     @Test func disconnectsAfterQuietAndIdle() {
         let decision = DaemonDecision.evaluate(
             nowPlaying: false,
-            quietSeconds: 3 * 60,  // exactly the threshold for the default 3-minute timeout
+            quietSeconds: 3 * 60,  // exactly the configured threshold
             idleSeconds: 3 * 60,
-            config: AppConfig()
+            config: threeMinuteConfig
         )
         #expect(decision == .disconnect(reason: .quietAndIdle))
         #expect(decision.shouldDisconnect)
@@ -45,7 +55,7 @@ struct DaemonDecisionTests {
             nowPlaying: false,
             quietSeconds: 2 * 60 + 59,  // one second short of the threshold
             idleSeconds: 60 * 60,
-            config: AppConfig()
+            config: threeMinuteConfig
         )
         #expect(decision == .stayConnected(reason: .silenceTooShort))
     }
@@ -55,7 +65,7 @@ struct DaemonDecisionTests {
             nowPlaying: false,
             quietSeconds: 60 * 60,
             idleSeconds: 3 * 60 - 1,  // one second short of the idle window
-            config: AppConfig()
+            config: threeMinuteConfig
         )
         #expect(decision == .stayConnected(reason: .idleTooShort))
     }
@@ -81,7 +91,7 @@ struct DaemonDecisionTests {
     // MARK: - ignoreUserActivity
 
     @Test func ignoresIdleWindowWhenConfigured() {
-        var config = AppConfig()
+        var config = threeMinuteConfig
         config.ignoreUserActivity = true
 
         // The user just moved the mouse, but we're configured to ignore that

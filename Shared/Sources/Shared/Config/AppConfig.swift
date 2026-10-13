@@ -28,8 +28,10 @@ public struct AppConfig: Codable, Equatable, Sendable {
 
     /// Defaults — single source of truth: the init, the forgiving decode, and
     /// normalization all reference these so values can't drift apart.
-    public static let defaultSilenceTimeoutMinutes = 3
-    public static let defaultInputWindowMinutes = 3
+    /// 15 minutes reads like the classic power-off delay; 3 felt
+    /// aggressive — a pause longer than that would drop the speaker.
+    public static let defaultSilenceTimeoutMinutes = 15
+    public static let defaultInputWindowMinutes = 15
     public static let defaultPollSeconds = 30
     public static let defaultLogLevel: LogLevel = .info
     public static let defaultSpeakerOnBattery = true
