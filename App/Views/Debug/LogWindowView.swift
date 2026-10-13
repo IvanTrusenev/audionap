@@ -1,63 +1,74 @@
 import SwiftUI
 
 /// The log window: the daemon.log tail, polled every 2 s — no refresh
-/// button, the poll is the refresh. Follows the tail while scrolled
-/// to the bottom; scrolling up pauses the follow, returning to the
-/// bottom resumes it. When the file holds more than the tail, the top
-/// line points at the file itself.
+/// button, the poll is the refresh. Follows the tail only while it is
+/// visible; scrolling up freezes the view entirely — new lines are
+/// buffered in the reader and applied in one go when the user returns
+/// to the bottom. Freezing, not re-rendering, is what keeps a lazy
+/// scroll view from nudging by a row when content grows under the
+/// reader. When the file holds more than the tail, the top line points
+/// at the file itself.
 struct LogWindowView: View {
     /// Fronts this window on repeated Logs-button clicks.
     let presenter: WindowPresenter
 
     @State private var reader = LogReader()
-    /// Whether the tail is visible — the only state where new lines
-    /// may pull the view along.
+    /// What the window shows — the reader's latest, applied only
+    /// while following.
+    @State private var displayedLines: [String] = []
+    @State private var displayedTruncated = false
+    /// Whether the tail is visible. Set by the bottom marker's
+    /// appearance inside the lazy stack.
     @State private var followingTail = true
 
     private let bottomID = "bottom"
 
     var body: some View {
-        GeometryReader { outer in
-            ScrollViewReader { proxy in
-                ScrollView([.vertical, .horizontal]) {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        if reader.truncated {
-                            // Rendered as the first row: it becomes
-                            // visible exactly when the user scrolls to
-                            // the top of the tail.
-                            Text("log.older")
-                                .font(.system(size: 11, design: .monospaced))
-                                .foregroundStyle(.secondary)
-                        }
-                        ForEach(Array(reader.lines.enumerated()), id: \.offset) { _, line in
-                            Text(verbatim: line)
-                                .font(.system(size: 11, design: .monospaced))
-                                .lineLimit(1)
-                                .fixedSize(horizontal: true, vertical: false)
-                                .textSelection(.enabled)
-                        }
-                        Color.clear
-                            .frame(height: 1)
-                            .id(bottomID)
+        ScrollViewReader { proxy in
+            // The anchor both opens the window at the tail and pins
+            // it there while new content arrives — no manual scroll
+            // can beat it, because a lazy stack never renders a
+            // bottom marker before the first scroll.
+            ScrollView([.vertical, .horizontal]) {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    if displayedTruncated {
+                        // Rendered as the first row: it becomes
+                        // visible exactly when the user scrolls to
+                        // the top of the tail.
+                        Text("log.older")
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundStyle(.secondary)
                     }
-                    .background(
-                        GeometryReader { content in
-                            Color.clear.preference(
-                                key: ContentFrameKey.self,
-                                value: content.frame(in: .named("logScroll")))
-                        }
-                    )
+                    ForEach(Array(displayedLines.enumerated()), id: \.offset) { _, line in
+                        Text(verbatim: line)
+                            .font(.system(size: 11, design: .monospaced))
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .textSelection(.enabled)
+                    }
+                    // The follow marker: rendered only while the end
+                    // of the content is on screen.
+                    Color.clear
+                        .frame(height: 1)
+                        .id(bottomID)
+                        .onAppear { followingTail = true }
+                        .onDisappear { followingTail = false }
                 }
-                .coordinateSpace(name: "logScroll")
-                .onPreferenceChange(ContentFrameKey.self) { frame in
-                    // The distance from the content's bottom edge to
-                    // the viewport's bottom edge — small means the
-                    // tail is on screen.
-                    let distance = frame.height + frame.minY - outer.size.height
-                    followingTail = distance < 12
+            }
+            .defaultScrollAnchor(.bottomLeading)
+            .onChange(of: followingTail) {
+                if followingTail {
+                    apply()
+                    proxy.scrollTo(bottomID, anchor: .bottom)
                 }
-                .onChange(of: reader.lines) {
+            }
+            .task {
+                apply()
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(2))
+                    reader.refresh()
                     if followingTail {
+                        apply()
                         proxy.scrollTo(bottomID, anchor: .bottom)
                     }
                 }
@@ -67,22 +78,12 @@ struct LogWindowView: View {
         // user, the scroll area takes whatever it is given.
         .frame(minWidth: 480, minHeight: 240)
         .background(WindowCapture(onWindow: { presenter.capture($0, as: .logs) }))
-        .task {
-            reader.refresh()
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(2))
-                reader.refresh()
-            }
-        }
     }
-}
 
-/// The scroll content's frame in the scroll coordinate space — its
-/// minY is the (negated) scroll offset.
-private struct ContentFrameKey: PreferenceKey {
-    static var defaultValue: CGRect = .zero
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
+    /// Moves the reader's latest content into the displayed state.
+    private func apply() {
+        displayedLines = reader.lines
+        displayedTruncated = reader.truncated
     }
 }
 
