@@ -8,14 +8,16 @@ struct EqualizerView: View {
 
     @Environment(\.appTheme) private var theme
 
-    /// Bar geometry: twice the old strip, built from VU-meter bricks —
-    /// 9 segments × 4 pt with 1 pt gaps fill 44 pt exactly. Internal:
-    /// it is also the fixed height of the signal slot — both slot
-    /// modes share it so the switch never resizes the popup.
-    static let maxHeight: CGFloat = 44
+    /// Bar geometry: VU-meter bricks — 9 segments × 6 pt with 2 pt gaps
+    /// fill 70 pt exactly. The whole grid is integer, on purpose: the
+    /// earlier 1.5 pt gaps landed on half-pixel boundaries alternately
+    /// and the antialiasing read as paired bricks. Internal: it is also
+    /// the fixed height of the signal slot — both slot modes share it
+    /// so the switch never resizes the popup.
+    static let maxHeight: CGFloat = 70
     private static let segmentCount = 9
-    private static let segmentHeight: CGFloat = 4
-    private static let segmentGap: CGFloat = 1
+    private static let segmentHeight: CGFloat = 6
+    private static let segmentGap: CGFloat = 2
 
     var body: some View {
         // The "window and shutter" model: a fixed full-height gradient

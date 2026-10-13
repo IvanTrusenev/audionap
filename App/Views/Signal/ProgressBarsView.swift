@@ -14,7 +14,7 @@ struct ProgressBarsView: View {
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 14) {
             block(
                 label: "progress.quiet",
                 seconds: quietSeconds,
@@ -31,7 +31,7 @@ struct ProgressBarsView: View {
         seconds: Int,
         limit: Int
     ) -> some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 3) {
             HStack {
                 Text(label)
                     .font(.caption)
@@ -43,15 +43,22 @@ struct ProgressBarsView: View {
                     .monospacedDigit()
             }
             GeometryReader { proxy in
+                // The "window and shutter" model, like the equalizer's:
+                // the fill is a plain square rectangle growing behind a
+                // capsule window. The visible left edge is always the
+                // window's round cap — it never morphs — and the moving
+                // right edge is the rectangle's straight cut. The clip
+                // keeps the fill inside the rounded ends at all widths.
                 ZStack(alignment: .leading) {
                     Capsule()
                         .fill(theme.equalizerAmber.opacity(0.25))
-                    Capsule()
+                    Rectangle()
                         .fill(theme.equalizerAmber)
                         .frame(width: proxy.size.width * fraction(seconds, limit))
                 }
+                .clipShape(Capsule())
             }
-            .frame(height: 5)
+            .frame(height: 12)
         }
     }
 
