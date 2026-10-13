@@ -429,6 +429,24 @@
         }
       }
     },
+    "log.older": {
+      "comment": "The note at the top of the log tail when the file holds earlier entries.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "…earlier entries — in daemon.log"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "…более ранние записи — в файле daemon.log"
+          }
+        }
+      }
+    },
     "log.title": {
       "comment": "The title of the daemon log section.",
       "extractionState": "manual",
@@ -436,13 +454,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Daemon log"
+            "value": "AudioNap Daemon Log"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Лог демона"
+            "value": "Лог демона AudioNap"
           }
         }
       }

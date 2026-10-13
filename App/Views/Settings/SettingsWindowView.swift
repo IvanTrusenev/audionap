@@ -10,7 +10,7 @@ struct SettingsWindowView: View {
     let store: ConfigStore
     let autostart: AutostartController
     /// Fronts this window on repeated settings-button clicks.
-    let presenter: SettingsWindowPresenter
+    let presenter: WindowPresenter
 
     /// The paired-device list for the picker; refreshed on appear and
     /// by the refresh button.
@@ -116,7 +116,7 @@ struct SettingsWindowView: View {
         }
         .formStyle(.grouped)
         .frame(width: 380)
-        .background(WindowCapture(onWindow: presenter.capture))
+        .background(WindowCapture(onWindow: { presenter.capture($0, as: .settings) }))
         .task {
             await reloadDevices()
         }
@@ -194,36 +194,6 @@ struct SettingsWindowView: View {
     SettingsWindowView(
         store: ConfigStore(),
         autostart: AutostartController(),
-        presenter: SettingsWindowPresenter())
+        presenter: WindowPresenter())
         .appTheme(.standard)
-}
-
-/// Reports the hosting NSWindow when it appears — the presenter uses
-/// it to re-front the settings window on repeated clicks, which
-/// openWindow alone cannot do.
-struct WindowCapture: NSViewRepresentable {
-    let onWindow: (NSWindow) -> Void
-
-    func makeNSView(context: Context) -> CaptureView {
-        let view = CaptureView()
-        view.onWindow = onWindow
-        return view
-    }
-
-    func updateNSView(_ nsView: CaptureView, context: Context) {
-        nsView.onWindow = onWindow
-    }
-
-    /// A plain NSView sees its window only in didMoveToWindow — the
-    /// one reliable moment to capture it.
-    final class CaptureView: NSView {
-        var onWindow: ((NSWindow) -> Void)?
-
-        override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow()
-            if let window {
-                onWindow?(window)
-            }
-        }
-    }
 }

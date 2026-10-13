@@ -2,35 +2,43 @@ import Foundation
 import Observation
 import Shared
 
-/// The tail of daemon.log for the menu bar window.
+/// The tail of daemon.log for the log window.
 ///
-/// Reads from the end of the file backwards in chunks, so a log that grows
-/// forever never loads fully.
+/// Reads from the end of the file backwards in chunks until roughly
+/// `byteLimit` bytes are collected, so a log that grows forever never
+/// loads fully. `truncated` reports that earlier entries exist beyond
+/// the tail — the window shows the pointer to the file itself.
 @MainActor
 @Observable
 public final class LogReader {
-    /// Last lines of the log, newest last.
+    /// The design's "no pagination" tail.
+    private static let byteLimit = 200_000
+
+    /// The tail's lines, newest last, cut at a line boundary.
     public private(set) var lines: [String] = []
+    /// True when the file holds more than the tail — earlier entries
+    /// exist but are not loaded.
+    public private(set) var truncated = false
 
     private let logURL: URL
-    private let lineLimit: Int
 
-    public init(logURL: URL = Paths.daemonLogURL, lineLimit: Int = 15) {
+    public init(logURL: URL = Paths.daemonLogURL) {
         self.logURL = logURL
-        self.lineLimit = lineLimit
     }
 
     /// Re-reads the tail. A missing file yields no lines — the daemon has
-    /// never logged yet — and the view shows an empty state, not an error.
+    /// never logged yet — and the window shows an empty state, not an error.
     public func refresh() {
-        lines = readTail()
+        let tail = readTail()
+        lines = tail.lines
+        truncated = tail.truncated
     }
 
     /// Walks the file backwards: read the last chunk, keep prepending
-    /// chunks until `lineLimit` lines are collected or the start is hit.
-    private func readTail() -> [String] {
+    /// chunks until `byteLimit` bytes are collected or the start is hit.
+    private func readTail() -> (lines: [String], truncated: Bool) {
         guard let handle = try? FileHandle(forReadingFrom: logURL) else {
-            return []
+            return ([], false)
         }
         defer { try? handle.close() }
 
@@ -43,11 +51,19 @@ public final class LogReader {
             try? handle.seek(toOffset: readStart)
             let chunk = handle.readDataToEndOfFile()
             collected = chunk + collected
-            let result = LogTailParser.lastLines(in: collected, limit: lineLimit)
-            if result.count >= lineLimit || readStart == 0 {
-                return result
+            guard collected.count >= Self.byteLimit || readStart == 0 else {
+                offset = readStart
+                continue
             }
-            offset = readStart
+
+            var data = Data(collected.suffix(Self.byteLimit))
+            // The cut lands mid-line; drop the partial first line so
+            // the window starts clean at a line boundary.
+            if let newline = data.firstIndex(of: 0x0A) {
+                data = data.subdata(in: (newline + 1)..<data.count)
+            }
+            let lines = LogTailParser.lastLines(in: data, limit: Int.max)
+            return (lines, truncated: offset > 0)
         }
     }
 }

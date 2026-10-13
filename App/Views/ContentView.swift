@@ -10,8 +10,8 @@ struct ContentView: View {
     let store: ConfigStore
     /// Shared with the settings window for the launch-at-login toggle.
     let autostart: AutostartController
-    /// Fronts the settings window on repeated clicks.
-    let windowPresenter: SettingsWindowPresenter
+    /// Fronts the app's windows on repeated clicks.
+    let windowPresenter: WindowPresenter
 
     /// Owns the view model for the app's lifetime. `@State` creates it once
     /// and keeps it across redraws; `DaemonController` is `@Observable`, so
@@ -96,7 +96,7 @@ struct ContentView: View {
         HStack {
             Button {
                 openWindow(id: "settings")
-                windowPresenter.front()
+                windowPresenter.front(.settings)
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "gearshape")
@@ -111,6 +111,7 @@ struct ContentView: View {
                 #if DEBUG
                 Button {
                     openWindow(id: "logs")
+                    windowPresenter.front(.logs)
                 } label: {
                     Text("action.logs")
                 }
@@ -153,7 +154,7 @@ struct ContentView: View {
     ContentView(
         store: ConfigStore(),
         autostart: AutostartController(),
-        windowPresenter: SettingsWindowPresenter())
+        windowPresenter: WindowPresenter())
         .appTheme(.standard)
 }
 
@@ -161,7 +162,7 @@ struct ContentView: View {
     ContentView(
         store: ConfigStore(),
         autostart: AutostartController(),
-        windowPresenter: SettingsWindowPresenter())
+        windowPresenter: WindowPresenter())
         .appTheme(.standard)
         .preferredColorScheme(.dark)
 }

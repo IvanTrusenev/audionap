@@ -8,9 +8,9 @@ struct AudioNapApp: App {
     /// the same filesystem truth everywhere.
     @State private var store = ConfigStore()
     @State private var autostart = AutostartController()
-    /// Fronts the settings window on repeated clicks — openWindow alone
+    /// Fronts the app's windows on repeated clicks — openWindow alone
     /// never re-fronts an existing window.
-    @State private var windowPresenter = SettingsWindowPresenter()
+    @State private var windowPresenter = WindowPresenter()
 
     var body: some Scene {
         MenuBarExtra("AudioNap", systemImage: "speaker.wave.2") {
@@ -30,5 +30,15 @@ struct AudioNapApp: App {
                 .appTheme(.standard)
         }
         .windowResizability(.contentSize)
+
+        #if DEBUG
+        Window("log.title", id: "logs") {
+            LogWindowView(presenter: windowPresenter)
+                .appTheme(.standard)
+        }
+        // A log viewer wants to stretch — unlike the fixed settings
+        // form, this window stays resizable.
+        .defaultSize(width: 560, height: 320)
+        #endif
     }
 }
