@@ -5,11 +5,15 @@ import SwiftUI
 /// Two blocks: silence fills toward `silenceTimeoutSeconds`, user
 /// inactivity toward `inputWindowSeconds`; both counters walk toward
 /// the daemon's disconnect decision, so the fill reads as attention.
+/// The idle block disappears while the daemon ignores user activity —
+/// a counter that no longer influences the decision would be noise.
 struct ProgressBarsView: View {
     let quietSeconds: Int
     let idleSeconds: Int
     let silenceTimeoutSeconds: Int
     let inputWindowSeconds: Int
+    /// Whether the daemon ignores user activity — hides the idle block.
+    let ignoreIdle: Bool
 
     @Environment(\.appTheme) private var theme
 
@@ -19,10 +23,12 @@ struct ProgressBarsView: View {
                 label: "progress.quiet",
                 seconds: quietSeconds,
                 limit: silenceTimeoutSeconds)
-            block(
-                label: "progress.idle",
-                seconds: idleSeconds,
-                limit: inputWindowSeconds)
+            if !ignoreIdle {
+                block(
+                    label: "progress.idle",
+                    seconds: idleSeconds,
+                    limit: inputWindowSeconds)
+            }
         }
     }
 
@@ -78,7 +84,19 @@ struct ProgressBarsView: View {
         quietSeconds: 420,
         idleSeconds: 720,
         silenceTimeoutSeconds: 900,
-        inputWindowSeconds: 900)
+        inputWindowSeconds: 900,
+        ignoreIdle: false)
+        .appTheme(.standard)
+        .padding()
+}
+
+#Preview("Ignoring idle") {
+    ProgressBarsView(
+        quietSeconds: 420,
+        idleSeconds: 720,
+        silenceTimeoutSeconds: 900,
+        inputWindowSeconds: 900,
+        ignoreIdle: true)
         .appTheme(.standard)
         .padding()
 }

@@ -14,6 +14,8 @@ struct SignalSection: View {
     let idleSeconds: Int
     let silenceTimeoutSeconds: Int
     let inputWindowSeconds: Int
+    /// Whether the daemon ignores user activity — hides the idle block.
+    let ignoreIdle: Bool
 
     var body: some View {
         ZStack {
@@ -25,7 +27,8 @@ struct SignalSection: View {
                     quietSeconds: quietSeconds,
                     idleSeconds: idleSeconds,
                     silenceTimeoutSeconds: silenceTimeoutSeconds,
-                    inputWindowSeconds: inputWindowSeconds)
+                    inputWindowSeconds: inputWindowSeconds,
+                    ignoreIdle: ignoreIdle)
                     .transition(.opacity)
             }
         }
@@ -42,7 +45,8 @@ struct SignalSection: View {
         quietSeconds: 0,
         idleSeconds: 30,
         silenceTimeoutSeconds: 900,
-        inputWindowSeconds: 900)
+        inputWindowSeconds: 900,
+        ignoreIdle: false)
         .appTheme(.standard)
         .padding()
 }
@@ -54,7 +58,8 @@ struct SignalSection: View {
         quietSeconds: 420,
         idleSeconds: 720,
         silenceTimeoutSeconds: 900,
-        inputWindowSeconds: 900)
+        inputWindowSeconds: 900,
+        ignoreIdle: false)
         .appTheme(.standard)
         .padding()
 }

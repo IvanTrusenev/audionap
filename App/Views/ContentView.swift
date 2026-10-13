@@ -43,7 +43,8 @@ struct ContentView: View {
                     quietSeconds: stateReader.quietSeconds,
                     idleSeconds: stateReader.idleSeconds,
                     silenceTimeoutSeconds: stateReader.silenceTimeoutSeconds,
-                    inputWindowSeconds: stateReader.inputWindowSeconds)
+                    inputWindowSeconds: stateReader.inputWindowSeconds,
+                    ignoreIdle: store.ignoreUserActivity)
             }
             Divider()
             DeviceSection(store: store)
