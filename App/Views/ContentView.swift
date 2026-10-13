@@ -2,8 +2,8 @@ import AppKit
 import SwiftUI
 
 /// The menu bar window: assembles the app's widgets — the daemon status
-/// and control row, the signal slot, the device row, and Quit. The
-/// widgets own their internals; this view only arranges them.
+/// and control row, the signal slot, the device row, and the bottom
+/// row. The widgets own their internals; this view only arranges them.
 struct ContentView: View {
     /// The config store is shared with the settings window — injected
     /// from the app, not owned here.
@@ -17,9 +17,6 @@ struct ContentView: View {
     /// and keeps it across redraws; `DaemonController` is `@Observable`, so
     /// SwiftUI re-renders this view when a property it read in `body` changes.
     @State private var controller = DaemonController()
-
-    /// Tail of daemon.log, refreshed on appear and by the Refresh button.
-    @State private var logReader = LogReader()
 
     /// Provisions the bundled daemon on first window open.
     @State private var installer = DaemonInstaller()
@@ -39,9 +36,10 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             ControlRow(controller: controller, daemonAlive: stateReader.daemonAlive)
             // The signal slot exists only while the daemon is alive —
-            // a stopped daemon hides it and the dividers collapse into
-            // one instead of stacking two in a row.
+            // a stopped daemon hides it and its divider, so the
+            // dividers collapse into one instead of stacking.
             if stateReader.daemonAlive {
+                Divider()
                 SignalSection(
                     bands: stateReader.bands,
                     playing: stateReader.playing,
@@ -57,17 +55,12 @@ struct ContentView: View {
             Divider()
             DeviceSection(store: store)
             Divider()
-            #if DEBUG
-            LogSection(reader: logReader)
-            Divider()
-            #endif
-            quitRow
+            bottomRow
         }
         .padding()
         .frame(width: 340)
         .onAppear {
             controller.refreshStatus()
-            logReader.refresh()
             stateReader.start()
         }
         .onDisappear {
@@ -95,21 +88,63 @@ struct ContentView: View {
         }
     }
 
-    /// A window-style MenuBarExtra has no application menu, so the window
-    /// needs its own Quit button. The settings gear is a temporary
-    /// trigger for the new window — the final bottom row arrives with
-    /// the next stage.
-    private var quitRow: some View {
+    /// The bottom row: settings on the left, Logs (DEBUG) and Quit on
+    /// the right. A window-style MenuBarExtra has no application menu,
+    /// so the window needs its own Quit button; the gear fronts the
+    /// settings window on repeated clicks.
+    private var bottomRow: some View {
         HStack {
-            Spacer()
             Button {
                 openWindow(id: "settings")
                 windowPresenter.front()
             } label: {
-                Image(systemName: "gearshape")
+                HStack(spacing: 4) {
+                    Image(systemName: "gearshape")
+                    Text("action.settings")
+                }
             }
-            .buttonStyle(.borderless)
-            Button("action.quit") { NSApplication.shared.terminate(nil) }
+            .buttonStyle(HoverButtonStyle())
+            Spacer()
+            // The right pair gets its own gap: without it "Logs" and
+            // the power icon read as one text-icon-text blob.
+            HStack(spacing: 24) {
+                #if DEBUG
+                Button {
+                    openWindow(id: "logs")
+                } label: {
+                    Text("action.logs")
+                }
+                .buttonStyle(HoverButtonStyle())
+                #endif
+                Button {
+                    NSApplication.shared.terminate(nil)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "power")
+                        Text("action.quit")
+                    }
+                }
+                .buttonStyle(HoverButtonStyle())
+            }
+        }
+    }
+    /// The bottom row's button style, in the macOS popover canon:
+    /// dimmed text at rest, a soft rounded fill on hover — the
+    /// selection highlight of a menu item, no border, no color flip.
+    private struct HoverButtonStyle: ButtonStyle {
+        @State private var hovering = false
+
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .foregroundStyle(Color.secondary)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(hovering ? Color.primary.opacity(0.08) : .clear)
+                )
+                .onHover { hovering = $0 }
+                .animation(.easeOut(duration: 0.1), value: hovering)
         }
     }
 }

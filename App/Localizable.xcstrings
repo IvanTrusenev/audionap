@@ -49,6 +49,24 @@
         }
       }
     },
+    "action.logs": {
+      "comment": "The button that opens the log window (DEBUG builds only).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Логи"
+          }
+        }
+      }
+    },
     "action.ok": {
       "comment": "The label of a button that dismisses an alert.",
       "extractionState": "manual",
@@ -99,6 +117,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Обновить"
+          }
+        }
+      }
+    },
+    "action.settings": {
+      "comment": "The button that opens the settings window.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки…"
           }
         }
       }
