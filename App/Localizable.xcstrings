@@ -627,6 +627,24 @@
         }
       }
     },
+    "settings.speaker": {
+      "comment": "The label of the speaker picker in the settings window.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speaker"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Колонка"
+          }
+        }
+      }
+    },
     "settings.speakerOnBattery": {
       "comment": "The toggle that limits disconnects to battery-powered speakers: off means the speaker is on wall power and is never disconnected.",
       "extractionState": "manual",

@@ -25,23 +25,31 @@ struct SettingsWindowView: View {
     var body: some View {
         Form {
             Section("device.title") {
-                Picker("device.title", selection: selectedMAC) {
-                    Text("device.none").tag(BluetoothMAC?.none)
-                    ForEach(sortedDevices, id: \.address) { device in
-                        Text(verbatim: "\(device.name) — \(device.address)")
-                            .tag(BluetoothMAC?.some(device.address))
-                    }
-                }
+                // The mockup's one-line row: the picker and the
+                // refresh icon. The section header names the domain;
+                // the picker's hidden label still serves accessibility.
                 HStack {
-                    if sortedDevices.isEmpty {
-                        Text("device.empty")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    Picker("settings.speaker", selection: selectedMAC) {
+                        Text("device.none").tag(BluetoothMAC?.none)
+                        ForEach(sortedDevices, id: \.address) { device in
+                            Text(verbatim: "\(device.name) — \(device.address)")
+                                .tag(BluetoothMAC?.some(device.address))
+                        }
                     }
+                    .labelsHidden()
                     Spacer()
-                    Button("action.refresh") {
+                    Button {
                         Task { await reloadDevices() }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
                     }
+                    .buttonStyle(HoverButtonStyle())
+                    .help("action.refresh")
+                }
+                if sortedDevices.isEmpty {
+                    Text("device.empty")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             Section("settings.timeouts") {

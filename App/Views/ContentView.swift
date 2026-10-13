@@ -89,9 +89,10 @@ struct ContentView: View {
     }
 
     /// The bottom row: settings on the left, Logs (DEBUG) and Quit on
-    /// the right. A window-style MenuBarExtra has no application menu,
-    /// so the window needs its own Quit button; the gear fronts the
-    /// settings window on repeated clicks.
+    /// the right, all in the shared HoverButtonStyle. A window-style
+    /// MenuBarExtra has no application menu, so the window needs its
+    /// own Quit button; the gear fronts the settings window on
+    /// repeated clicks.
     private var bottomRow: some View {
         HStack {
             Button {
@@ -127,25 +128,6 @@ struct ContentView: View {
                 }
                 .buttonStyle(HoverButtonStyle())
             }
-        }
-    }
-    /// The bottom row's button style, in the macOS popover canon:
-    /// dimmed text at rest, a soft rounded fill on hover — the
-    /// selection highlight of a menu item, no border, no color flip.
-    private struct HoverButtonStyle: ButtonStyle {
-        @State private var hovering = false
-
-        func makeBody(configuration: Configuration) -> some View {
-            configuration.label
-                .foregroundStyle(Color.secondary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(hovering ? Color.primary.opacity(0.08) : .clear)
-                )
-                .onHover { hovering = $0 }
-                .animation(.easeOut(duration: 0.1), value: hovering)
         }
     }
 }
