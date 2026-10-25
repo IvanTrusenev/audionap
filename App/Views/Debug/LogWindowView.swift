@@ -7,19 +7,13 @@ import SwiftUI
 /// to the bottom. Freezing, not re-rendering, is what keeps a lazy
 /// scroll view from nudging by a row when content grows under the
 /// reader. When the file holds more than the tail, the top line points
-/// at the file itself.
+/// at the file itself. The follow logic lives in
+/// LogWindowViewModel; this view only renders and scrolls.
 struct LogWindowView: View {
     /// Fronts this window on repeated Logs-button clicks.
     let presenter: WindowPresenter
 
-    @State private var reader = LogReader()
-    /// What the window shows — the reader's latest, applied only
-    /// while following.
-    @State private var displayedLines: [String] = []
-    @State private var displayedTruncated = false
-    /// Whether the tail is visible. Set by the bottom marker's
-    /// appearance inside the lazy stack.
-    @State private var followingTail = true
+    @State private var vm = LogWindowViewModel()
     /// Hover state of the jump button.
     @State private var jumpHovering = false
 
@@ -33,7 +27,7 @@ struct LogWindowView: View {
             // bottom marker before the first scroll.
             ScrollView([.vertical, .horizontal]) {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    if displayedTruncated {
+                    if vm.displayedTruncated {
                         // Rendered as the first row: it becomes
                         // visible exactly when the user scrolls to
                         // the top of the tail.
@@ -41,7 +35,7 @@ struct LogWindowView: View {
                             .font(AppTypography.log)
                             .foregroundStyle(.secondary)
                     }
-                    ForEach(Array(displayedLines.enumerated()), id: \.offset) { _, line in
+                    ForEach(Array(vm.displayedLines.enumerated()), id: \.offset) { _, line in
                         Text(verbatim: line)
                             .font(AppTypography.log)
                             .lineLimit(1)
@@ -53,30 +47,31 @@ struct LogWindowView: View {
                     Color.clear
                         .frame(height: 1)
                         .id(bottomID)
-                        .onAppear { followingTail = true }
-                        .onDisappear { followingTail = false }
+                        .onAppear { vm.followingTail = true }
+                        .onDisappear { vm.followingTail = false }
                 }
             }
             .defaultScrollAnchor(.bottomLeading)
-            .onChange(of: followingTail) {
-                if followingTail {
-                    apply()
+            .onChange(of: vm.followingTail) {
+                // Follow resumed (scrolled to the tail or jumped):
+                // flush the buffered lines and land on the tail.
+                if vm.followingTail {
+                    vm.apply()
+                    proxy.scrollTo(bottomID, anchor: .bottom)
+                }
+            }
+            .onChange(of: vm.displayedLines) {
+                // The poll applied new lines while following — stay
+                // pinned to the tail.
+                if vm.followingTail {
                     proxy.scrollTo(bottomID, anchor: .bottom)
                 }
             }
             .task {
-                apply()
-                while !Task.isCancelled {
-                    try? await Task.sleep(for: .seconds(2))
-                    reader.refresh()
-                    if followingTail {
-                        apply()
-                        proxy.scrollTo(bottomID, anchor: .bottom)
-                    }
-                }
+                await vm.start()
             }
             .overlay(alignment: .bottom) {
-                if !followingTail {
+                if !vm.followingTail {
                     jumpButton(proxy: proxy)
                 }
             }
@@ -87,12 +82,6 @@ struct LogWindowView: View {
         .background(WindowCapture(onWindow: { presenter.capture($0, as: .logs) }))
     }
 
-    /// Moves the reader's latest content into the displayed state.
-    private func apply() {
-        displayedLines = reader.lines
-        displayedTruncated = reader.truncated
-    }
-
     /// The "Jump to Now" affordance, in the Console style: appears
     /// only while the follow is paused, says "you are not at the
     /// tail", and returns to it in one click. Deliberately quiet at
@@ -100,9 +89,7 @@ struct LogWindowView: View {
     /// content — and gains its emphasis on hover.
     private func jumpButton(proxy: ScrollViewProxy) -> some View {
         Button {
-            followingTail = true
-            apply()
-            proxy.scrollTo(bottomID, anchor: .bottom)
+            vm.followingTail = true
         } label: {
             Image(systemName: "arrow.down")
                 .font(AppTypography.jumpButtonIcon)
@@ -125,7 +112,7 @@ struct LogWindowView: View {
         .onHover { jumpHovering = $0 }
         .padding(.bottom, 8)
         .transition(.opacity)
-        .animation(.easeOut(duration: 0.15), value: followingTail)
+        .animation(.easeOut(duration: 0.15), value: vm.followingTail)
         .animation(.easeOut(duration: 0.15), value: jumpHovering)
     }
 }
