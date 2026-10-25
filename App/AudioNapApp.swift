@@ -16,7 +16,6 @@ struct AudioNapApp: App {
         MenuBarExtra("AudioNap", systemImage: "speaker.wave.2") {
             ContentView(
                 store: store,
-                autostart: autostart,
                 windowPresenter: windowPresenter)
                 .appTheme(.standard)
         }

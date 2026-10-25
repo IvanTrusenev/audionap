@@ -3,96 +3,67 @@ import SwiftUI
 
 /// The menu bar window: assembles the app's widgets — the daemon status
 /// and control row, the signal slot, the device row, and the bottom
-/// row. The widgets own their internals; this view only arranges them.
+/// row. The view models own the internals; this view only arranges
+/// the widgets.
 struct ContentView: View {
-    /// The config store is shared with the settings window — injected
-    /// from the app, not owned here.
-    let store: ConfigStore
-    /// Shared with the settings window for the launch-at-login toggle.
-    let autostart: AutostartController
     /// Fronts the app's windows on repeated clicks.
     let windowPresenter: WindowPresenter
 
-    /// Owns the view model for the app's lifetime. `@State` creates it once
-    /// and keeps it across redraws; `DaemonController` is `@Observable`, so
-    /// SwiftUI re-renders this view when a property it read in `body` changes.
-    @State private var controller = DaemonController()
-
-    /// Provisions the bundled daemon on first window open.
-    @State private var installer = DaemonInstaller()
-
-    /// The daemon's live state (equalizer bands), refreshed on a timer
-    /// while the window is open.
-    @State private var stateReader = StateReader()
-
-    /// Install failures surface in an alert (same pattern as ControlRow).
-    @State private var installErrorMessage = ""
-
-    @State private var showingInstallError = false
-
-    /// The speaker's connection state, polled by DeviceSection and
-    /// hoisted here: the signal slot is pointless while the speaker is
-    /// disconnected, so it hides with it. `nil` until the first poll —
-    /// "unknown" keeps the slot visible to avoid a flicker on open.
-    @State private var speakerConnected: Bool? = nil
+    /// The window's presentation model — owns the daemon controller,
+    /// the live-state reader and the installer.
+    @State private var vm: ContentViewModel
+    /// The device section's presentation model — owns the device
+    /// list, the connection poll and the connect/disconnect
+    /// operation. The slot gate reads its `isConnected`.
+    @State private var deviceVM: DeviceSectionViewModel
 
     @Environment(\.openWindow) private var openWindow
 
+    init(store: ConfigStore, windowPresenter: WindowPresenter) {
+        self.windowPresenter = windowPresenter
+        _vm = State(initialValue: ContentViewModel(store: store))
+        _deviceVM = State(initialValue: DeviceSectionViewModel(store: store))
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ControlRow(controller: controller, daemonAlive: stateReader.daemonAlive)
+            ControlRow(controller: vm.controller, daemonAlive: vm.daemonAlive)
             // The signal slot exists only while it can mean something:
             // the daemon alive and the speaker connected. A stopped
             // daemon or a disconnected speaker hides it and its
             // divider, so the dividers collapse into one instead of
             // stacking.
-            if stateReader.daemonAlive && speakerConnected != false {
+            if vm.daemonAlive && deviceVM.isConnected != false {
                 Divider()
                 SignalSection(
-                    bands: stateReader.bands,
-                    playing: stateReader.playing,
-                    quietSeconds: stateReader.quietSeconds,
-                    idleSeconds: stateReader.idleSeconds,
-                    // The thresholds are config, not runtime state: the
-                    // store is their fresher truth than the daemon's
-                    // publication round-trip.
-                    silenceTimeoutSeconds: store.silenceTimeoutSeconds,
-                    inputWindowSeconds: store.inputWindowSeconds,
-                    ignoreIdle: store.ignoreUserActivity)
+                    bands: vm.bands,
+                    playing: vm.playing,
+                    quietSeconds: vm.quietSeconds,
+                    idleSeconds: vm.idleSeconds,
+                    silenceTimeoutSeconds: vm.silenceTimeoutSeconds,
+                    inputWindowSeconds: vm.inputWindowSeconds,
+                    ignoreIdle: vm.ignoreUserActivity)
             }
             Divider()
-            DeviceSection(store: store, isConnected: $speakerConnected)
+            DeviceSection(vm: deviceVM)
             Divider()
             bottomRow
         }
         .padding()
         .frame(width: 340)
         .onAppear {
-            controller.refreshStatus()
-            stateReader.start()
+            vm.start()
         }
         .onDisappear {
-            stateReader.stop()
+            vm.stop()
         }
         .task {
-            // Preview hosts run the whole app (same bundle ID) and unit
-            // tests host it too — neither should install the daemon.
-            let environment = ProcessInfo.processInfo.environment
-            guard environment["XCODE_RUNNING_FOR_PREVIEWS"] != "1",
-                  environment["XCTestConfigurationFilePath"] == nil else {
-                return
-            }
-            do {
-                _ = try await installer.ensureInstalled()
-            } catch {
-                installErrorMessage = error.localizedDescription
-                showingInstallError = true
-            }
+            await vm.ensureDaemonInstalled()
         }
-        .alert("error.daemonInstall.title", isPresented: $showingInstallError) {
+        .alert("error.daemonInstall.title", isPresented: $vm.showingInstallError) {
             Button("action.ok") {}
         } message: {
-            Text(installErrorMessage)
+            Text(vm.installErrorMessage)
         }
     }
 
@@ -141,7 +112,6 @@ struct ContentView: View {
 #Preview("Light") {
     ContentView(
         store: ConfigStore(),
-        autostart: AutostartController(),
         windowPresenter: WindowPresenter())
         .appTheme(.standard)
 }
@@ -149,7 +119,6 @@ struct ContentView: View {
 #Preview("Dark") {
     ContentView(
         store: ConfigStore(),
-        autostart: AutostartController(),
         windowPresenter: WindowPresenter())
         .appTheme(.standard)
         .preferredColorScheme(.dark)
