@@ -9,6 +9,10 @@ import Observation
 @MainActor
 @Observable
 public final class LogWindowViewModel {
+    /// How often the tail is re-read — no refresh button, the poll is
+    /// the refresh.
+    private static let pollInterval: Duration = .seconds(2)
+
     private let reader = LogReader()
 
     /// What the window shows — the reader's latest, applied only
@@ -26,7 +30,7 @@ public final class LogWindowViewModel {
     public func start() async {
         apply()
         while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(2))
+            try? await Task.sleep(for: Self.pollInterval)
             reader.refresh()
             if followingTail {
                 apply()

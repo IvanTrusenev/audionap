@@ -8,6 +8,9 @@ import SwiftUI
 /// The idle block disappears while the daemon ignores user activity —
 /// a counter that no longer influences the decision would be noise.
 struct ProgressBarsView: View {
+    /// The bar's fixed height.
+    private static let barHeight: CGFloat = 12
+
     let quietSeconds: Int
     let idleSeconds: Int
     let silenceTimeoutSeconds: Int
@@ -64,7 +67,7 @@ struct ProgressBarsView: View {
                 }
                 .clipShape(Capsule())
             }
-            .frame(height: 12)
+            .frame(height: Self.barHeight)
         }
     }
 

@@ -10,6 +10,11 @@ import SwiftUI
 /// at the file itself. The follow logic lives in
 /// LogWindowViewModel; this view only renders and scrolls.
 struct LogWindowView: View {
+    /// Minimums, not a hard frame: the window stretches with the
+    /// user, the scroll area takes whatever it is given.
+    private static let windowMinWidth: CGFloat = 480
+    private static let windowMinHeight: CGFloat = 240
+
     /// Fronts this window on repeated Logs-button clicks.
     let presenter: WindowPresenter
 
@@ -76,9 +81,9 @@ struct LogWindowView: View {
                 }
             }
         }
-        // Minimums, not a hard frame: the window stretches with the
-        // user, the scroll area takes whatever it is given.
-        .frame(minWidth: 480, minHeight: 240)
+        // The scroll area takes whatever it is given; these are the
+        // minimums the window opens with.
+        .frame(minWidth: Self.windowMinWidth, minHeight: Self.windowMinHeight)
         .background(WindowCapture(onWindow: { presenter.capture($0, as: .logs) }))
     }
 

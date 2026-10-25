@@ -5,6 +5,9 @@ import SwiftUI
 /// pinned right — state text changes do not move it.
 /// Owns its own error alert: only this row produces daemon control errors.
 struct ControlRow: View {
+    /// The status dot's diameter.
+    private static let statusDotSize: CGFloat = 8
+
     let controller: DaemonController
     /// The heartbeat truth from StateReader — the settled status comes
     /// from the daemon's own publication, not from launchctl readings.
@@ -21,7 +24,7 @@ struct ControlRow: View {
         HStack(spacing: 8) {
             Circle()
                 .fill(stateColor)
-                .frame(width: 8, height: 8)
+                .frame(width: Self.statusDotSize, height: Self.statusDotSize)
             Text(statusText)
             Spacer()
             toggleButton

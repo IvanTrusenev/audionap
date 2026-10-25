@@ -12,6 +12,12 @@ import SwiftUI
 /// (toggles), and a grouped Form's column machinery squeezes them
 /// into the control column.
 struct SettingsWindowView: View {
+    /// The window's fixed width.
+    private static let windowWidth: CGFloat = 380
+    /// The extra air on the slider rows' inner sides — mirrors the
+    /// card's outer padding so every item stays symmetric.
+    private static let sliderInnerAir: CGFloat = 10
+
     /// Fronts this window on repeated settings-button clicks.
     let presenter: WindowPresenter
     /// The presentation model — created once for the window's
@@ -77,14 +83,14 @@ struct SettingsWindowView: View {
                         value: $vm.silenceTimeoutSlider,
                         range: AppConfig.silenceTimeoutRange
                     )
-                    .padding(.bottom, 10)
+                    .padding(.bottom, Self.sliderInnerAir)
                     Divider()
                     SettingsSliderRow(
                         label: String(localized: "settings.timeoutValue \(String(localized: "settings.idleWindow")) \(vm.inputWindowMinutes)"),
                         value: $vm.inputWindowSlider,
                         range: AppConfig.inputWindowRange
                     )
-                    .padding(.top, 10)
+                    .padding(.top, Self.sliderInnerAir)
                 }
             }
             groupSpacing
@@ -103,7 +109,7 @@ struct SettingsWindowView: View {
             }
         }
         .padding(12)
-        .frame(width: 380)
+        .frame(width: Self.windowWidth)
         // Every button in this window is a small accessory icon —
         // the shared hover style is injected once, not per button.
         .buttonStyle(HoverButtonStyle())

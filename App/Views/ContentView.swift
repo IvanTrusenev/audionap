@@ -6,6 +6,9 @@ import SwiftUI
 /// row. The view models own the internals; this view only arranges
 /// the widgets.
 struct ContentView: View {
+    /// The popup's fixed width — a menu bar window does not resize.
+    private static let popupWidth: CGFloat = 340
+
     /// Fronts the app's windows on repeated clicks.
     let windowPresenter: WindowPresenter
 
@@ -50,7 +53,7 @@ struct ContentView: View {
             bottomRow
         }
         .padding()
-        .frame(width: 340)
+        .frame(width: Self.popupWidth)
         .onAppear {
             vm.start()
         }

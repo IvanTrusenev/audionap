@@ -9,6 +9,9 @@ import Shared
 @MainActor
 @Observable
 public final class DeviceSectionViewModel {
+    /// How often the connection state is re-read from blueutil.
+    private static let pollInterval: Duration = .seconds(2)
+
     private let store: ConfigStore
 
     /// The paired list, only to resolve the selected MAC into a name.
@@ -63,11 +66,11 @@ public final class DeviceSectionViewModel {
         isConnected = await BlueutilRunner.isConnected(to: mac)
     }
 
-    /// Polls the connection state every 2 s; skips polling while an
-    /// operation is in flight.
+    /// Polls the connection state; skips polling while an operation is
+    /// in flight.
     private func pollConnectionState() async {
         while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(2))
+            try? await Task.sleep(for: Self.pollInterval)
             guard !isUpdatingConnection else { continue }
             await refreshConnectionState()
         }
