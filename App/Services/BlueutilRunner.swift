@@ -53,16 +53,27 @@ public enum BlueutilRunner {
         }.value
     }
 
-    /// Runs blueutil by its resolved absolute path; nil when the binary
-    /// is missing. `nonisolated` — detached closures call this off the
+    /// Runs blueutil by its resolved path; nil when the binary is
+    /// missing. `nonisolated` — detached closures call this off the
     /// main actor, and the module defaults to main-actor isolation.
     nonisolated private static func runBlocking(
         arguments: [String]
     ) -> (output: String, exitCode: Int32)? {
-        guard let blueutilPath = BlueutilLocator.resolve() else { return nil }
+        guard let blueutilPath = resolveBlueutil() else { return nil }
         guard let result = ProcessRunner.run(executable: blueutilPath, arguments: arguments) else {
             return nil
         }
         return (result.stdout, result.exitCode)
+    }
+
+    /// The binary's path: the config wins over the prefixes over the
+    /// PATH — a custom install location is a user's explicit choice.
+    nonisolated private static func resolveBlueutil() -> String? {
+        let config = AppConfig.load(from: Paths.configURL)
+        if let configured = config.blueutilPath,
+           FileManager.default.isExecutableFile(atPath: configured) {
+            return configured
+        }
+        return BlueutilLocator.resolve()
     }
 }

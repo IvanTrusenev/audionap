@@ -30,6 +30,22 @@ speaker's own 15-minute timer → powers off
 When the audio capture is unavailable (no permission, no display), the
 daemon falls back to the legacy "Playing audio" power-assertion signal.
 
+## Configuration
+
+The daemon reads `~/Library/Application Support/AudioNap/config.plist`;
+the app writes it atomically and invalid values fall back to defaults.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `silenceTimeoutMinutes` | 15 | Silence minutes before the disconnect (1–30) |
+| `inputWindowMinutes` | 15 | Recent-input minutes that keep the speaker connected (1–30) |
+| `pollSeconds` | 30 | Daemon decision interval in seconds (10–120) |
+| `speakerMAC` | — | The babysat speaker's MAC address |
+| `ignoreUserActivity` | false | Count only silence, ignore input |
+| `speakerOnBattery` | false | Disconnect only while the speaker runs on battery |
+| `blueutilPath` | — | Absolute path to a custom `blueutil` install. When set and executable it wins over the standard prefixes and the PATH |
+| `nowPlayingCLIPath` | — | Optional nowplaying-cli fallback (never bundled — GPL) |
+
 ## Install
 
 ### Homebrew (recommended)

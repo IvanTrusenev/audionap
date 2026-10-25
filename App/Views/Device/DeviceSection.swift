@@ -25,17 +25,17 @@ struct DeviceSection: View {
                     vm.performToggle()
                 } label: {
                     HStack(spacing: 6) {
-                        if vm.isUpdatingConnection {
+                        if vm.status?.isTransitioning == true {
                             ProgressView()
                                 .controlSize(.small)
                         } else {
                             Image(systemName: "antenna.radiowaves.left.and.right")
                         }
-                        Text(vm.isConnected == true ? "action.disconnect" : "action.connect")
+                        Text(buttonTitle)
                     }
-                    .foregroundStyle(vm.isConnected == true ? theme.statusInactive : theme.statusActive)
+                    .foregroundStyle(buttonColor)
                 }
-                .disabled(vm.speakerMAC == nil || vm.isUpdatingConnection)
+                .disabled(vm.speakerMAC == nil || vm.status?.isTransitioning == true)
             }
         }
         .task {
@@ -45,6 +45,28 @@ struct DeviceSection: View {
             Button("action.ok") {}
         } message: {
             Text(vm.errorMessage)
+        }
+    }
+
+    /// The button shows the action it performs, not the current
+    /// state: Disconnect while connected (and while disconnecting),
+    /// Connect otherwise — the transitions keep their target label
+    /// with a spinner.
+    private var buttonTitle: LocalizedStringKey {
+        switch vm.status {
+        case .connected, .disconnecting: "action.disconnect"
+        case nil, .disconnected, .connecting: "action.connect"
+        }
+    }
+
+    /// Semantic color: the stable states carry the hue (Disconnect
+    /// reads destructive, Connect positive), transitions are neutral
+    /// like the daemon button's.
+    private var buttonColor: Color {
+        switch vm.status {
+        case .connected: theme.deviceConnected
+        case nil, .disconnected: theme.deviceDisconnected
+        case .connecting, .disconnecting: theme.statusTransitioning
         }
     }
 }

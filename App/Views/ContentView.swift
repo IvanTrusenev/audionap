@@ -36,7 +36,7 @@ struct ContentView: View {
             // daemon or a disconnected speaker hides it and its
             // divider, so the dividers collapse into one instead of
             // stacking.
-            if vm.daemonAlive && deviceVM.isConnected != false {
+            if vm.daemonAlive && deviceVM.showsSignalSlot {
                 Divider()
                 SignalSection(
                     bands: vm.bands,
@@ -57,7 +57,7 @@ struct ContentView: View {
         // The slot's appear/disappear animates the window's height
         // too — a menu bar window follows its content.
         .animation(.easeOut(duration: 0.2), value: vm.daemonAlive)
-        .animation(.easeOut(duration: 0.2), value: deviceVM.isConnected)
+        .animation(.easeOut(duration: 0.2), value: deviceVM.showsSignalSlot)
         // A menu bar window ignores preferredColorScheme — register
         // it with the store, which sets the appearance on open and on
         // every theme change.

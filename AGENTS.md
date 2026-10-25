@@ -127,4 +127,9 @@ ignored there). Daemon status stage 9 ✓ (2026-10-25, live-traced with
 DevLog over 5 scenarios): directional `statusStarting`/`statusStopping`
 tokens, stop confirmed by polling launchd, the settled truth wins over
 the lagging heartbeat, and start is idempotent — double clicks no
-longer kill or stall the daemon.
+longer kill or stall the daemon. Device state machine stage 10 ✓
+(2026-10-25, live scenarios D1–D5): `DeviceStatus` with
+connecting/disconnecting, settle on a confirmed blueutil reading,
+directional device tokens, the slot gated by the connection state,
+and `blueutilPath` resolved as config > prefixes > PATH (README
+Configuration section added).

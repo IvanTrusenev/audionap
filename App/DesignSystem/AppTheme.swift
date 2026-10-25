@@ -30,6 +30,14 @@ public struct AppTheme: Sendable {
     /// today, but a meaning, not a hue: a future palette may change
     /// it without touching the view.
     public var equalizerLed: Color
+    /// The device button's colors: the stable states carry the hue
+    /// (Disconnect reads destructive, Connect positive), the
+    /// transitions stay neutral on the button but keep their
+    /// directional dimmed tokens for the state machine's future.
+    public var deviceConnected: Color
+    public var deviceDisconnected: Color
+    public var deviceConnecting: Color
+    public var deviceDisconnecting: Color
 
     /// The equalizer's fixed background: the strip's full height is
     /// painted in the broadcast VU-meter scale — green (bottom), amber
@@ -55,7 +63,11 @@ public struct AppTheme: Sendable {
         equalizerCold: Color(.equalizerCold),
         equalizerAmber: Color(.equalizerAmber),
         equalizerHot: Color(.equalizerHot),
-        equalizerLed: Color(.equalizerLed)
+        equalizerLed: Color(.equalizerLed),
+        deviceConnected: Color(.deviceConnected),
+        deviceDisconnected: Color(.deviceDisconnected),
+        deviceConnecting: Color(.deviceConnecting),
+        deviceDisconnecting: Color(.deviceDisconnecting)
     )
 }
 
