@@ -10,9 +10,11 @@ struct DeviceSection: View {
 
     /// The paired list, only to resolve the selected MAC into a name.
     @State private var devices: [BlueutilDevice] = []
-    /// Last known connection state; refreshed on open, after each
-    /// action, and by a poll while the window is open.
-    @State private var isConnected = false
+    /// The speaker's connection state, owned by the parent (the signal
+    /// slot hides while the speaker is disconnected): `nil` until the
+    /// first poll answers, so the UI can tell "unknown" from
+    /// "confirmed disconnected" and avoid flicker.
+    @Binding var isConnected: Bool?
     /// True while a connect/disconnect operation is in flight.
     @State private var isUpdatingConnection = false
     /// Text of the last reconnect failure, shown in an alert.
@@ -25,7 +27,7 @@ struct DeviceSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text("device.title")
-                .font(.caption)
+                .font(AppTypography.popupSectionHeader)
                 .foregroundStyle(.secondary)
             HStack {
                 // One line, tail-truncated: a long device name ends
@@ -44,9 +46,9 @@ struct DeviceSection: View {
                         } else {
                             Image(systemName: "antenna.radiowaves.left.and.right")
                         }
-                        Text(isConnected ? "action.disconnect" : "action.connect")
+                        Text(isConnected == true ? "action.disconnect" : "action.connect")
                     }
-                    .foregroundStyle(isConnected ? theme.statusInactive : theme.statusActive)
+                    .foregroundStyle(isConnected == true ? theme.statusInactive : theme.statusActive)
                 }
                 .disabled(store.speakerMAC == nil || isUpdatingConnection)
             }
@@ -105,7 +107,7 @@ struct DeviceSection: View {
         isUpdatingConnection = true
         Task {
             do {
-                if isConnected {
+                if isConnected == true {
                     try await BlueutilRunner.disconnect(from: mac)
                 } else {
                     try await BlueutilRunner.connect(to: mac)

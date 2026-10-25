@@ -40,11 +40,11 @@ struct ProgressBarsView: View {
         VStack(spacing: 3) {
             HStack {
                 Text(label)
-                    .font(.caption)
+                    .font(AppTypography.helper)
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text(verbatim: "\(Self.time(seconds)) / \(Self.time(limit))")
-                    .font(.caption)
+                    .font(AppTypography.helper)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }

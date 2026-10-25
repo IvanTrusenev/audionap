@@ -38,12 +38,12 @@ struct LogWindowView: View {
                         // visible exactly when the user scrolls to
                         // the top of the tail.
                         Text("log.older")
-                            .font(.system(size: 11, design: .monospaced))
+                            .font(AppTypography.log)
                             .foregroundStyle(.secondary)
                     }
                     ForEach(Array(displayedLines.enumerated()), id: \.offset) { _, line in
                         Text(verbatim: line)
-                            .font(.system(size: 11, design: .monospaced))
+                            .font(AppTypography.log)
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
                             .textSelection(.enabled)
@@ -105,7 +105,7 @@ struct LogWindowView: View {
             proxy.scrollTo(bottomID, anchor: .bottom)
         } label: {
             Image(systemName: "arrow.down")
-                .font(.system(size: 12, weight: .semibold))
+                .font(AppTypography.jumpButtonIcon)
                 .foregroundStyle(.secondary)
                 .padding(6)
                 .background(

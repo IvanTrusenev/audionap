@@ -30,15 +30,23 @@ struct ContentView: View {
 
     @State private var showingInstallError = false
 
+    /// The speaker's connection state, polled by DeviceSection and
+    /// hoisted here: the signal slot is pointless while the speaker is
+    /// disconnected, so it hides with it. `nil` until the first poll —
+    /// "unknown" keeps the slot visible to avoid a flicker on open.
+    @State private var speakerConnected: Bool? = nil
+
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ControlRow(controller: controller, daemonAlive: stateReader.daemonAlive)
-            // The signal slot exists only while the daemon is alive —
-            // a stopped daemon hides it and its divider, so the
-            // dividers collapse into one instead of stacking.
-            if stateReader.daemonAlive {
+            // The signal slot exists only while it can mean something:
+            // the daemon alive and the speaker connected. A stopped
+            // daemon or a disconnected speaker hides it and its
+            // divider, so the dividers collapse into one instead of
+            // stacking.
+            if stateReader.daemonAlive && speakerConnected != false {
                 Divider()
                 SignalSection(
                     bands: stateReader.bands,
@@ -53,7 +61,7 @@ struct ContentView: View {
                     ignoreIdle: store.ignoreUserActivity)
             }
             Divider()
-            DeviceSection(store: store)
+            DeviceSection(store: store, isConnected: $speakerConnected)
             Divider()
             bottomRow
         }
@@ -89,10 +97,10 @@ struct ContentView: View {
     }
 
     /// The bottom row: settings on the left, Logs (DEBUG) and Quit on
-    /// the right, all in the shared HoverButtonStyle. A window-style
-    /// MenuBarExtra has no application menu, so the window needs its
-    /// own Quit button; the gear fronts the settings window on
-    /// repeated clicks.
+    /// the right, all in the shared HoverButtonStyle, injected once on
+    /// the row. A window-style MenuBarExtra has no application menu, so
+    /// the window needs its own Quit button; the gear fronts the
+    /// settings window on repeated clicks.
     private var bottomRow: some View {
         HStack {
             Button {
@@ -104,7 +112,6 @@ struct ContentView: View {
                     Text("action.settings")
                 }
             }
-            .buttonStyle(HoverButtonStyle())
             Spacer()
             // The right pair gets its own gap: without it "Logs" and
             // the power icon read as one text-icon-text blob.
@@ -116,7 +123,6 @@ struct ContentView: View {
                 } label: {
                     Text("action.logs")
                 }
-                .buttonStyle(HoverButtonStyle())
                 #endif
                 Button {
                     NSApplication.shared.terminate(nil)
@@ -126,9 +132,9 @@ struct ContentView: View {
                         Text("action.quit")
                     }
                 }
-                .buttonStyle(HoverButtonStyle())
             }
         }
+        .buttonStyle(HoverButtonStyle())
     }
 }
 

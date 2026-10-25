@@ -51,7 +51,7 @@ struct EqualizerView: View {
         return VStack(spacing: Self.segmentGap) {
             ForEach(0..<Self.segmentCount, id: \.self) { index in
                 RoundedRectangle(cornerRadius: 1)
-                    .fill(index >= Self.segmentCount - filled ? .white : .clear)
+                    .fill(index >= Self.segmentCount - filled ? theme.equalizerLed : .clear)
                     .frame(height: Self.segmentHeight)
             }
         }

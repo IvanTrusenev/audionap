@@ -40,6 +40,19 @@ struct SettingsWindowView: View {
                             Text(verbatim: "\(device.name) — \(device.address)")
                                 .tag(BluetoothMAC?.some(device.address))
                         }
+                        // The picker must always offer the current
+                        // selection among its tags — SwiftUI logs
+                        // "invalid selection" otherwise. The paired
+                        // list loads async, so on the first frames the
+                        // configured device is not among the rows yet;
+                        // the bare address stands in for its row until
+                        // the list arrives (or forever, if the device
+                        // is no longer paired).
+                        if let mac = store.speakerMAC,
+                           !sortedDevices.contains(where: { $0.address == mac }) {
+                            Text(verbatim: mac.value)
+                                .tag(BluetoothMAC?.some(mac))
+                        }
                     }
                     .labelsHidden()
                     Spacer()
@@ -48,16 +61,15 @@ struct SettingsWindowView: View {
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
-                    .buttonStyle(HoverButtonStyle())
                     .help("action.refresh")
                 }
                 if sortedDevices.isEmpty {
                     Text("device.empty")
-                        .font(.caption)
+                        .font(AppTypography.helper)
                         .foregroundStyle(.secondary)
                 }
             }
-            groupDivider
+            groupSpacing
             section("settings.timeouts") {
                 VStack(spacing: 0) {
                     slider(
@@ -79,8 +91,8 @@ struct SettingsWindowView: View {
                     )
                 }
             }
-            groupDivider
-            section("settings.behavior") {
+            groupSpacing
+            section("settings.behavior", flush: true) {
                 VStack(spacing: 0) {
                     toggleRow(
                         title: "settings.ignoreUserActivity",
@@ -89,7 +101,6 @@ struct SettingsWindowView: View {
                             set: { store.ignoreUserActivity = $0 }
                         )
                     )
-                    .padding(.vertical, 4)
                     Divider()
                     toggleRow(
                         title: "settings.speakerOnBattery",
@@ -98,7 +109,6 @@ struct SettingsWindowView: View {
                             set: { store.speakerOnBattery = $0 }
                         )
                     )
-                    .padding(.vertical, 4)
                     Divider()
                     toggleRow(
                         title: "settings.launchAtLogin",
@@ -120,10 +130,9 @@ struct SettingsWindowView: View {
                             }
                         )
                     )
-                    .padding(.vertical, 4)
                 }
             }
-            groupDivider
+            groupSpacing
             Button("settings.restoreDefaults") {
                 store.resetDefaults()
                 launchAtLogin = false
@@ -137,10 +146,12 @@ struct SettingsWindowView: View {
                     }
                 }
             }
-            .buttonStyle(HoverButtonStyle())
         }
         .padding(12)
         .frame(width: 380)
+        // Every button in this window is a small accessory icon —
+        // the shared hover style is injected once, not per button.
+        .buttonStyle(HoverButtonStyle())
         .background(WindowCapture(onWindow: { presenter.capture($0, as: .settings) }))
         .task {
             await reloadDevices()
@@ -155,19 +166,20 @@ struct SettingsWindowView: View {
         }
     }
 
-    /// A group: the macOS header style (small caps caption) over the
-    /// group's content, wrapped in the inset container of the modern
-    /// System Settings look.
+    /// A group: the SectionHeader role over the group's content,
+    /// wrapped in the inset container of the modern System Settings
+    /// look. `flush` cards hold a list of rows edge-to-edge (no
+    /// vertical padding, like a native list card), padded cards hold
+    /// controls.
     private func section(
-        _ title: LocalizedStringKey, @ViewBuilder content: () -> some View
+        _ title: LocalizedStringKey, flush: Bool = false,
+        @ViewBuilder content: () -> some View
     ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.caption)
-                .textCase(.uppercase)
-                .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title)
             content()
-                .padding(10)
+                .padding(.horizontal, 10)
+                .padding(.vertical, flush ? 0 : 10)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
@@ -176,8 +188,12 @@ struct SettingsWindowView: View {
         }
     }
 
-    private var groupDivider: some View {
-        Divider().padding(.vertical, 10)
+    /// The gap between groups: empty space, no divider line — the
+    /// native settings separate their cards with air, not rules.
+    /// 31 pt from the card's bottom edge to the next group's header,
+    /// measured against System Settings.
+    private var groupSpacing: some View {
+        Spacer().frame(height: 31)
     }
 
     /// Picker selection writes straight into the config store — the
@@ -204,9 +220,10 @@ struct SettingsWindowView: View {
     /// A settings row: the switch pinned right. A plain Toggle would sit
     /// the control right after the label text, so the label owns the
     /// stretch instead — the Spacer inside it takes the free width and
-    /// the switch lands on the trailing edge. `controlSize(.mini)`
-    /// matches the compact switches in System Settings; the macOS pill
-    /// renders large by default.
+    /// the switch lands on the trailing edge. The 44 pt row matches the
+    /// System Settings row pitch (measured), so every item gets the
+    /// same height wherever it stands; `controlSize(.mini)` keeps the
+    /// compact switch of the original design.
     private func toggleRow(
         title: LocalizedStringKey, isOn: Binding<Bool>
     ) -> some View {
@@ -218,6 +235,7 @@ struct SettingsWindowView: View {
         }
         .toggleStyle(.switch)
         .controlSize(.mini)
+        .frame(height: 44)
     }
 
     /// Labeled slider. Slider only binds BinaryFloatingPoint values, so the
