@@ -2,41 +2,38 @@ import Shared
 import SwiftUI
 
 /// The settings window: device, timeouts, behavior — everything that
-/// left the popup for the roomier window. All changes persist through
-/// the shared ConfigStore and hot-reload the daemon. Restore Defaults
-/// resets timeouts and toggles but never the device: the device is a
-/// choice, not a setting.
+/// left the popup for the roomier window. The view only visualizes
+/// the SettingsWindowViewModel: all bindings point into it, all
+/// changes persist through the shared ConfigStore and hot-reload the
+/// daemon.
 ///
 /// A custom layout, not a native Form: the design's controls are
 /// full-width with the label above (sliders) or pinned right
 /// (toggles), and a grouped Form's column machinery squeezes them
 /// into the control column.
 struct SettingsWindowView: View {
-    let store: ConfigStore
-    let autostart: AutostartController
     /// Fronts this window on repeated settings-button clicks.
     let presenter: WindowPresenter
+    /// The presentation model — created once for the window's
+    /// lifetime, like the popup's StateReader.
+    @State private var vm: SettingsWindowViewModel
 
-    /// The paired-device list for the picker; refreshed on appear and
-    /// by the refresh button.
-    @State private var devices: [BlueutilDevice] = []
-    /// Autostart state comes from the filesystem, not memory: the
-    /// toggle survives app restarts and stays honest if the file was
-    /// touched.
-    @State private var launchAtLogin = false
-    @State private var autostartErrorMessage = ""
-    @State private var showingAutostartError = false
+    init(store: ConfigStore, autostart: AutostartController, presenter: WindowPresenter) {
+        self.presenter = presenter
+        _vm = State(initialValue: SettingsWindowViewModel(store: store, autostart: autostart))
+    }
 
     var body: some View {
+        @Bindable var vm = vm
         VStack(alignment: .leading, spacing: 0) {
             SettingsSection("device.title") {
                 // The mockup's one-line row: the picker and the
                 // refresh icon. The section header names the domain;
                 // the picker's hidden label still serves accessibility.
                 HStack {
-                    Picker("settings.speaker", selection: selectedMAC) {
+                    Picker("settings.speaker", selection: $vm.speakerMAC) {
                         Text("device.none").tag(BluetoothMAC?.none)
-                        ForEach(sortedDevices, id: \.address) { device in
+                        ForEach(vm.sortedDevices, id: \.address) { device in
                             Text(verbatim: "\(device.name) — \(device.address)")
                                 .tag(BluetoothMAC?.some(device.address))
                         }
@@ -48,8 +45,8 @@ struct SettingsWindowView: View {
                         // the bare address stands in for its row until
                         // the list arrives (or forever, if the device
                         // is no longer paired).
-                        if let mac = store.speakerMAC,
-                           !sortedDevices.contains(where: { $0.address == mac }) {
+                        if let mac = vm.speakerMAC,
+                           !vm.sortedDevices.contains(where: { $0.address == mac }) {
                             Text(verbatim: mac.value)
                                 .tag(BluetoothMAC?.some(mac))
                         }
@@ -57,13 +54,13 @@ struct SettingsWindowView: View {
                     .labelsHidden()
                     Spacer()
                     Button {
-                        Task { await reloadDevices() }
+                        Task { await vm.reloadDevices() }
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
                     .help("action.refresh")
                 }
-                if sortedDevices.isEmpty {
+                if vm.sortedDevices.isEmpty {
                     Text("device.empty")
                         .font(AppTypography.helper)
                         .foregroundStyle(.secondary)
@@ -72,28 +69,19 @@ struct SettingsWindowView: View {
             groupSpacing
             SettingsSection("settings.timeouts") {
                 VStack(spacing: 0) {
+                    // The label is one localized template with two
+                    // placeholders (title and minute count), so the
+                    // word order can differ per language.
                     SettingsSliderRow(
-                        label: timeoutLabel(
-                            String(localized: "settings.silenceTimeout"),
-                            minutes: store.silenceTimeoutMinutes
-                        ),
-                        value: Binding(
-                            get: { Double(store.silenceTimeoutMinutes) },
-                            set: { store.silenceTimeoutMinutes = Int($0) }
-                        ),
+                        label: String(localized: "settings.timeoutValue \(String(localized: "settings.silenceTimeout")) \(vm.silenceTimeoutMinutes)"),
+                        value: $vm.silenceTimeoutSlider,
                         range: AppConfig.silenceTimeoutRange
                     )
                     .padding(.bottom, 10)
                     Divider()
                     SettingsSliderRow(
-                        label: timeoutLabel(
-                            String(localized: "settings.idleWindow"),
-                            minutes: store.inputWindowMinutes
-                        ),
-                        value: Binding(
-                            get: { Double(store.inputWindowMinutes) },
-                            set: { store.inputWindowMinutes = Int($0) }
-                        ),
+                        label: String(localized: "settings.timeoutValue \(String(localized: "settings.idleWindow")) \(vm.inputWindowMinutes)"),
+                        value: $vm.inputWindowSlider,
                         range: AppConfig.inputWindowRange
                     )
                     .padding(.top, 10)
@@ -102,57 +90,16 @@ struct SettingsWindowView: View {
             groupSpacing
             SettingsSection("settings.behavior", flush: true) {
                 VStack(spacing: 0) {
-                    SettingsToggleRow(
-                        "settings.ignoreUserActivity",
-                        isOn: Binding(
-                            get: { store.ignoreUserActivity },
-                            set: { store.ignoreUserActivity = $0 }
-                        )
-                    )
+                    SettingsToggleRow("settings.ignoreUserActivity", isOn: $vm.ignoreUserActivity)
                     Divider()
-                    SettingsToggleRow(
-                        "settings.speakerOnBattery",
-                        isOn: Binding(
-                            get: { store.speakerOnBattery },
-                            set: { store.speakerOnBattery = $0 }
-                        )
-                    )
+                    SettingsToggleRow("settings.speakerOnBattery", isOn: $vm.speakerOnBattery)
                     Divider()
-                    SettingsToggleRow(
-                        "settings.launchAtLogin",
-                        isOn: Binding(
-                            get: { launchAtLogin },
-                            set: { newValue in
-                                launchAtLogin = newValue
-                                Task {
-                                    do {
-                                        try await autostart.setEnabled(newValue)
-                                    } catch {
-                                        // The filesystem is the truth: re-read it
-                                        // so the toggle snaps back honestly.
-                                        launchAtLogin = AutostartController.isEnabled()
-                                        autostartErrorMessage = error.localizedDescription
-                                        showingAutostartError = true
-                                    }
-                                }
-                            }
-                        )
-                    )
+                    SettingsToggleRow("settings.launchAtLogin", isOn: $vm.launchAtLogin)
                 }
             }
             groupSpacing
             Button("settings.restoreDefaults") {
-                store.resetDefaults()
-                launchAtLogin = false
-                Task {
-                    do {
-                        try await autostart.setEnabled(false)
-                    } catch {
-                        launchAtLogin = AutostartController.isEnabled()
-                        autostartErrorMessage = error.localizedDescription
-                        showingAutostartError = true
-                    }
-                }
+                vm.restoreDefaults()
             }
         }
         .padding(12)
@@ -162,15 +109,12 @@ struct SettingsWindowView: View {
         .buttonStyle(HoverButtonStyle())
         .background(WindowCapture(onWindow: { presenter.capture($0, as: .settings) }))
         .task {
-            await reloadDevices()
+            await vm.reloadDevices()
         }
-        .onAppear {
-            launchAtLogin = AutostartController.isEnabled()
-        }
-        .alert("error.autostart.title", isPresented: $showingAutostartError) {
+        .alert("error.autostart.title", isPresented: $vm.showingAutostartError) {
             Button("action.ok") {}
         } message: {
-            Text(autostartErrorMessage)
+            Text(vm.autostartErrorMessage)
         }
     }
 
@@ -180,34 +124,6 @@ struct SettingsWindowView: View {
     /// measured against System Settings.
     private var groupSpacing: some View {
         Spacer().frame(height: 31)
-    }
-
-    /// Picker selection writes straight into the config store — the
-    /// daemon hot-reloads.
-    private var selectedMAC: Binding<BluetoothMAC?> {
-        Binding(
-            get: { store.speakerMAC },
-            set: { store.speakerMAC = $0 }
-        )
-    }
-
-    /// Connected devices first — the speaker being set up is usually
-    /// connected — then by name.
-    private var sortedDevices: [BlueutilDevice] {
-        devices.sorted {
-            ($0.connected ? 0 : 1, $0.name) < ($1.connected ? 0 : 1, $1.name)
-        }
-    }
-
-    private func reloadDevices() async {
-        devices = await BlueutilRunner.pairedDevices()
-    }
-
-    /// The slider row's label: one localized template with two
-    /// placeholders (title and minute count), so the word order can
-    /// differ per language.
-    private func timeoutLabel(_ title: String, minutes: Int) -> String {
-        String(localized: "settings.timeoutValue \(title) \(minutes)")
     }
 }
 
