@@ -33,5 +33,9 @@ public struct SettingsSliderRow: View {
             .frame(maxWidth: .infinity)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        // The row carries its own vertical air, like
+        // SettingsToggleRow's 44 pt: an item never sits tight against
+        // the card edge or the hairline.
+        .padding(.vertical, 10)
     }
 }

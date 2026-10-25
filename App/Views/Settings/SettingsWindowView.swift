@@ -83,7 +83,8 @@ struct SettingsWindowView: View {
                         ),
                         range: AppConfig.silenceTimeoutRange
                     )
-                    Divider().padding(.vertical, 8)
+                    .padding(.bottom, 10)
+                    Divider()
                     SettingsSliderRow(
                         label: timeoutLabel(
                             String(localized: "settings.idleWindow"),
@@ -95,6 +96,7 @@ struct SettingsWindowView: View {
                         ),
                         range: AppConfig.inputWindowRange
                     )
+                    .padding(.top, 10)
                 }
             }
             groupSpacing
