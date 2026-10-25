@@ -26,9 +26,7 @@ struct DeviceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text("device.title")
-                .font(AppTypography.popupSectionHeader)
-                .foregroundStyle(.secondary)
+            PopupSectionHeader("device.title")
             HStack {
                 // One line, tail-truncated: a long device name ends
                 // with an ellipsis instead of wrapping the section.
