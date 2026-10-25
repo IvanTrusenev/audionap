@@ -22,6 +22,10 @@ public struct AppTheme: Sendable {
     public var equalizerAmber: Color
     /// The equalizer's hot end — the red the bars grow toward.
     public var equalizerHot: Color
+    /// The equalizer's lit LED segment — white in both appearances
+    /// today, but a meaning, not a hue: a future palette may change
+    /// it without touching the view.
+    public var equalizerLed: Color
 
     /// The equalizer's fixed background: the strip's full height is
     /// painted in the broadcast VU-meter scale — green (bottom), amber
@@ -44,7 +48,8 @@ public struct AppTheme: Sendable {
         statusTransitioning: Color(.statusTransitioning),
         equalizerCold: Color(.equalizerCold),
         equalizerAmber: Color(.equalizerAmber),
-        equalizerHot: Color(.equalizerHot)
+        equalizerHot: Color(.equalizerHot),
+        equalizerLed: Color(.equalizerLed)
     )
 }
 
@@ -71,29 +76,5 @@ public extension View {
     /// any subtree may override it with another theme.
     func appTheme(_ theme: AppTheme) -> some View {
         environment(\.appTheme, theme)
-    }
-}
-
-/// The shared style of icon/text accessory buttons, in the macOS
-/// canon: dimmed at rest, a soft rounded fill on hover — the
-/// selection highlight of a menu item, no border, no color flip.
-/// Used by the popup's footer row and the settings window's
-/// accessory icons.
-public struct HoverButtonStyle: ButtonStyle {
-    @State private var hovering = false
-
-    public init() {}
-
-    public func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .foregroundStyle(Color.secondary)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .background(
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(hovering ? Color.primary.opacity(0.08) : .clear)
-            )
-            .onHover { hovering = $0 }
-            .animation(.easeOut(duration: 0.1), value: hovering)
     }
 }

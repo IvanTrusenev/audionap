@@ -53,6 +53,22 @@ when the team agrees on a new convention.
   values internal to a function
 - Log through `os.Logger` with subsystem `online.threealab.audionap`
 
+## Design system
+
+- Views never pick raw hues: semantic colors come from `AppTheme`
+  (Color Sets in the asset catalog, Light/Dark variants). Platform roles
+  (`.primary`, `.secondary`, `.quaternary`, materials) are for platform
+  meanings. A new meaning = a new Color Set + an `AppTheme` token, never
+  a raw `Color` in a view.
+- Views never spell out fonts: text roles come from `AppTypography`
+  (fonts only — color is the orthogonal `foregroundStyle` axis, default
+  primary, overridden on the spot). A new role = a new token, never a
+  raw size or weight in a view.
+- Reusable looks are components or style types, not repeated modifiers:
+  view components live in `App/DesignSystem/Components/`, control style
+  types (`ButtonStyle`, `ToggleStyle`) in `App/DesignSystem/Styles/`,
+  injected once on the container via environment.
+
 ## Testing
 
 - Framework: Swift Testing (`@Test`, `#expect`)

@@ -37,7 +37,10 @@ user inactivity, letting the speaker's own power-off timer finish the job.
 - UI design tokens: semantic Color Sets in the app asset catalog, consumed via
   `AppTheme` injected through the environment; views reference meanings
   (`statusActive`), never raw hues, and generated asset symbols keep the
-  references compile-time checked.
+  references compile-time checked. Typography follows the same rule: roles
+  from `AppTypography` (`sectionHeader`), never raw sizes or weights. Views
+  use only palette/typography tokens or platform roles (`.secondary`) — see
+  STYLE.md, "Design system".
 - App Info.plists live in `InfoPlists/` (per-configuration split): both carry
   `NSBluetoothAlwaysUsageDescription` (blueutil aborts under the TCC gate
   without it), release also carries `LSMultipleInstancesProhibited` (debug
