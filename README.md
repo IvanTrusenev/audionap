@@ -122,7 +122,7 @@ Release build and packaging from the command line:
 
 ```bash
 just build            # universal Release app with verification gates
-just release 0.3.0    # dist/: AudioNap-0.3.0.zip, audionapd-0.3.0.zip, SHA256SUMS.txt
+just release 0.4.0    # dist/: AudioNap-0.4.0.zip, audionapd-0.4.0.zip, SHA256SUMS.txt
 ```
 
 or
