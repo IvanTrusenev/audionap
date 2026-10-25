@@ -54,6 +54,10 @@ struct ContentView: View {
         }
         .padding()
         .frame(width: Self.popupWidth)
+        // The slot's appear/disappear animates the window's height
+        // too — a menu bar window follows its content.
+        .animation(.easeOut(duration: 0.2), value: vm.daemonAlive)
+        .animation(.easeOut(duration: 0.2), value: deviceVM.isConnected)
         .onAppear {
             vm.start()
         }
