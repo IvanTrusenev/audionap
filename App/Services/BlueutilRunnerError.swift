@@ -12,12 +12,12 @@ extension BlueutilRunnerError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .notFound:
-            String(localized: "error.blueutilNotFound")
+            LanguageStore.shared.string("error.blueutilNotFound")
         case .connectFailed(let exitCode):
             // Int64, not Int — see the same note in DaemonControlError.
-            String(localized: "error.connectFailed \(Int64(exitCode))")
+            String(format: LanguageStore.shared.string("error.connectFailed %lld"), Int64(exitCode))
         case .disconnectFailed(let exitCode):
-            String(localized: "error.disconnectFailed \(Int64(exitCode))")
+            String(format: LanguageStore.shared.string("error.disconnectFailed %lld"), Int64(exitCode))
         }
     }
 }

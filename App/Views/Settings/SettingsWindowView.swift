@@ -23,6 +23,10 @@ struct SettingsWindowView: View {
     /// The presentation model — created once for the window's
     /// lifetime, like the popup's StateReader.
     @State private var vm: SettingsWindowViewModel
+    /// The appearance and language preferences — thin UserDefaults
+    /// wrappers, bound straight into the pickers.
+    @Bindable private var appearance = AppearanceStore.shared
+    @Bindable private var language = LanguageStore.shared
 
     init(store: ConfigStore, autostart: AutostartController, presenter: WindowPresenter) {
         self.presenter = presenter
@@ -79,14 +83,20 @@ struct SettingsWindowView: View {
                     // placeholders (title and minute count), so the
                     // word order can differ per language.
                     SettingsSliderRow(
-                        label: String(localized: "settings.timeoutValue \(String(localized: "settings.silenceTimeout")) \(vm.silenceTimeoutMinutes)"),
+                        label: String(
+                            format: LanguageStore.shared.string("settings.timeoutValue %@ %lld"),
+                            LanguageStore.shared.string("settings.silenceTimeout"),
+                            vm.silenceTimeoutMinutes),
                         value: $vm.silenceTimeoutSlider,
                         range: AppConfig.silenceTimeoutRange
                     )
                     .padding(.bottom, Self.sliderInnerAir)
                     Divider()
                     SettingsSliderRow(
-                        label: String(localized: "settings.timeoutValue \(String(localized: "settings.idleWindow")) \(vm.inputWindowMinutes)"),
+                        label: String(
+                            format: LanguageStore.shared.string("settings.timeoutValue %@ %lld"),
+                            LanguageStore.shared.string("settings.idleWindow"),
+                            vm.inputWindowMinutes),
                         value: $vm.inputWindowSlider,
                         range: AppConfig.inputWindowRange
                     )
@@ -101,6 +111,37 @@ struct SettingsWindowView: View {
                     SettingsToggleRow("settings.speakerOnBattery", isOn: $vm.speakerOnBattery)
                     Divider()
                     SettingsToggleRow("settings.launchAtLogin", isOn: $vm.launchAtLogin)
+                }
+            }
+            groupSpacing
+            SettingsSection("settings.appearance", flush: true) {
+                VStack(spacing: 0) {
+                    HStack {
+                        Text("appearance.theme")
+                        Spacer()
+                        Picker("appearance.theme", selection: $appearance.mode) {
+                            ForEach(AppearanceStore.Mode.allCases, id: \.self) { mode in
+                                Text(themeLabel(mode)).tag(mode)
+                            }
+                        }
+                        .labelsHidden()
+                        .fixedSize()
+                    }
+                    .frame(height: 44)
+                    Divider()
+                    HStack {
+                        Text("appearance.language")
+                        Spacer()
+                        Picker("appearance.language", selection: $language.language) {
+                            Text("appearance.system").tag(LanguageStore.Language?.none)
+                            ForEach(language.availableLanguages, id: \.self) { lang in
+                                Text(verbatim: lang.displayName).tag(LanguageStore.Language?.some(lang))
+                            }
+                        }
+                        .labelsHidden()
+                        .fixedSize()
+                    }
+                    .frame(height: 44)
                 }
             }
             groupSpacing
@@ -130,6 +171,15 @@ struct SettingsWindowView: View {
     /// measured against System Settings.
     private var groupSpacing: some View {
         Spacer().frame(height: 31)
+    }
+
+    /// The theme picker's labels.
+    private func themeLabel(_ mode: AppearanceStore.Mode) -> LocalizedStringKey {
+        switch mode {
+        case .system: "appearance.system"
+        case .light: "appearance.light"
+        case .dark: "appearance.dark"
+        }
     }
 }
 

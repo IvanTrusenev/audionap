@@ -184,9 +184,9 @@ extension DaemonControlError: LocalizedError {
             // integer is "%lld", and so is the extractor's key for Int64 —
             // with plain Int Xcode's extractor derives "%d" and the catalog
             // gains a junk key that never resolves.
-            String(localized: "error.bootstrapFailed \(Int64(exitCode))")
+            String(format: LanguageStore.shared.string("error.bootstrapFailed %lld"), Int64(exitCode))
         case .bootoutFailed(let exitCode):
-            String(localized: "error.bootoutFailed \(Int64(exitCode))")
+            String(format: LanguageStore.shared.string("error.bootoutFailed %lld"), Int64(exitCode))
         }
     }
 }

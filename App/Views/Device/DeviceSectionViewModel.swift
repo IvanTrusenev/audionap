@@ -38,7 +38,7 @@ public final class DeviceSectionViewModel {
     /// design's read-only display.
     public var deviceName: String {
         guard let mac = store.speakerMAC else {
-            return String(localized: "device.none")
+            return LanguageStore.shared.string("device.none")
         }
         return devices.first(where: { $0.address == mac })?.name ?? mac.description
     }

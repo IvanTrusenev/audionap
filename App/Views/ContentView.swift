@@ -58,6 +58,12 @@ struct ContentView: View {
         // too — a menu bar window follows its content.
         .animation(.easeOut(duration: 0.2), value: vm.daemonAlive)
         .animation(.easeOut(duration: 0.2), value: deviceVM.isConnected)
+        // A menu bar window ignores preferredColorScheme — register
+        // it with the store, which sets the appearance on open and on
+        // every theme change.
+        .background(WindowCapture(onWindow: { window in
+            AppearanceStore.shared.register(window)
+        }))
         .onAppear {
             vm.start()
         }

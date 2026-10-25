@@ -68,6 +68,14 @@ when the team agrees on a new convention.
   view components live in `App/DesignSystem/Components/`, control style
   types (`ButtonStyle`, `ToggleStyle`) in `App/DesignSystem/Styles/`,
   injected once on the container via environment.
+- The color scheme: windows carry `preferredColorScheme` (nil = system,
+  drives the window background) plus an always-concrete
+  `environment(\.colorScheme, resolvedColorScheme)` for the content —
+  both modifiers always in the tree, never behind if/else branches
+  (branches broke the updates). The menu bar window ignores
+  `preferredColorScheme` — it registers with `AppearanceStore` which
+  sets its `NSAppearance` directly. The language is applied via
+  `.environment(\.locale)` (see `appAppearance()`).
 
 ## Testing
 

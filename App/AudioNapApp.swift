@@ -18,6 +18,7 @@ struct AudioNapApp: App {
                 store: store,
                 windowPresenter: windowPresenter)
                 .appTheme(.standard)
+                .appAppearance()
         }
         .menuBarExtraStyle(.window)
 
@@ -27,6 +28,7 @@ struct AudioNapApp: App {
                 autostart: autostart,
                 presenter: windowPresenter)
                 .appTheme(.standard)
+                .appAppearance()
         }
         .windowResizability(.contentSize)
 
@@ -34,6 +36,7 @@ struct AudioNapApp: App {
         Window("log.title", id: "logs") {
             LogWindowView(presenter: windowPresenter)
                 .appTheme(.standard)
+                .appAppearance()
         }
         // A log viewer wants to stretch — unlike the fixed settings
         // form, this window stays resizable.

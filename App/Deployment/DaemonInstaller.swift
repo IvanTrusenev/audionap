@@ -58,7 +58,7 @@ extension DaemonInstallError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .bundledDaemonMissing:
-            String(localized: "error.daemonInstall.bundledMissing")
+            LanguageStore.shared.string("error.daemonInstall.bundledMissing")
         }
     }
 }
