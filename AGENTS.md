@@ -113,4 +113,18 @@ VU-meter equalizer of the same signal. e2e: Telemost/browser held,
 full silence+idle → disconnect cycle passed under launchd; release CPU
 ~3.7% of a core. Left for a convenient moment: the uninstall --zap
 cycle (with a config backup) and the manual zip path; the plutil-config
-watcher quirk (external edits don't hot-reload).
+watcher quirk (external edits don't hot-reload). Settings redesign ✓
+(2026-10-25, stages 1–8): the settings window measured against System
+Settings (semibold headers, 31 pt group gaps, 44 pt edge-to-edge rows),
+the design system extracted (`AppTheme`/`AppTypography`, components in
+`App/DesignSystem/Components/`, styles in `Styles/`), the signal slot
+hides while the speaker is disconnected, and every window got its
+presentation model (View → VM → store/services). Theme and language
+settings ✓ (2026-10-25): `AppearanceStore`/`LanguageStore` over
+UserDefaults, an Appearance group in the settings window, the menu bar
+window gets its appearance via `NSAppearance` (preferredColorScheme is
+ignored there). Daemon status stage 9 ✓ (2026-10-25, live-traced with
+DevLog over 5 scenarios): directional `statusStarting`/`statusStopping`
+tokens, stop confirmed by polling launchd, the settled truth wins over
+the lagging heartbeat, and start is idempotent — double clicks no
+longer kill or stall the daemon.

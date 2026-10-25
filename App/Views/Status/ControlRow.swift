@@ -44,13 +44,14 @@ struct ControlRow: View {
         vm.displayedStatus(daemonAlive: daemonAlive)
     }
 
-    /// Semantic color per daemon state: active, inactive, or neutral
-    /// while an operation is in flight.
+    /// Semantic color per daemon state: active, inactive, or the
+    /// dimmed directional hue while an operation is in flight.
     private var stateColor: Color {
         switch displayedStatus {
         case .running: theme.statusActive
         case .stopped: theme.statusInactive
-        case .starting, .stopping: theme.statusTransitioning
+        case .starting: theme.statusStarting
+        case .stopping: theme.statusStopping
         }
     }
 

@@ -13,6 +13,10 @@ public struct AppTheme: Sendable {
     /// The neutral color of the daemon controls while an operation
     /// is in flight.
     public var statusTransitioning: Color
+    /// The dimmed directional dot colors while starting/stopping —
+    /// the transition keeps its hue, just quieter.
+    public var statusStarting: Color
+    public var statusStopping: Color
     /// The equalizer's cold end — the green the bars start from.
     /// A dedicated token, not `statusActive`: "daemon alive" and "low
     /// audio level" are different meanings that happen to share a hue
@@ -46,6 +50,8 @@ public struct AppTheme: Sendable {
         statusActive: Color(.statusActive),
         statusInactive: Color(.statusInactive),
         statusTransitioning: Color(.statusTransitioning),
+        statusStarting: Color(.statusStarting),
+        statusStopping: Color(.statusStopping),
         equalizerCold: Color(.equalizerCold),
         equalizerAmber: Color(.equalizerAmber),
         equalizerHot: Color(.equalizerHot),

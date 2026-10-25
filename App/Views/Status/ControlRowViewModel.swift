@@ -24,13 +24,20 @@ public final class ControlRowViewModel {
     public var isTransitioning: Bool { controller.status.isTransitioning }
 
     /// The status the row shows: a local transition while an operation
-    /// is in flight, otherwise the heartbeat truth — an externally
-    /// stopped daemon reads as stopped within the heartbeat's
-    /// freshness window, without any refresh.
+    /// is in flight; right after a confirmed stop, the settled launchd
+    /// truth — the heartbeat still reads alive for up to its freshness
+    /// window and must not flip the button back to Stop; otherwise the
+    /// heartbeat truth — an externally stopped daemon reads as stopped
+    /// within the heartbeat's freshness window, without any refresh.
     public func displayedStatus(daemonAlive: Bool) -> DaemonStatus {
-        controller.status.isTransitioning
-            ? controller.status
-            : (daemonAlive ? .running : .stopped)
+        if controller.status.isTransitioning {
+            return controller.status
+        }
+        if controller.status == .stopped,
+           Date().timeIntervalSince(controller.lastSettleDate) < DaemonController.heartbeatFreshness {
+            return .stopped
+        }
+        return daemonAlive ? .running : .stopped
     }
 
     /// Start/stop per the displayed status; failures surface in the

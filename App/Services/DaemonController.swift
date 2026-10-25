@@ -9,7 +9,15 @@ import Shared
 @MainActor
 @Observable
 public final class DaemonController {
+    /// Mirrors StateReader.staleAfter: the heartbeat reads "alive" for
+    /// up to this long after the daemon actually died.
+    public static let heartbeatFreshness: TimeInterval = 1.5
+
     public private(set) var status: DaemonStatus = .stopped
+    /// When the last settle happened — a confirmed stop outruns the
+    /// heartbeat's freshness window, and the UI uses this to trust
+    /// the settled truth over the stale "alive" reading.
+    public private(set) var lastSettleDate = Date.distantPast
 
     /// launchd label: online.threealab.audionap.daemon (matches the plist file name).
     nonisolated static let label = "\(AppIdentity.bundleID).daemon"
@@ -34,9 +42,15 @@ public final class DaemonController {
     /// Syncs the settled state with the heartbeat before an operation —
     /// an external stop/start leaves the local machine stale, and the
     /// next transition must start from the truth, not from memory.
-    /// No-op while an operation is in flight.
+    /// No-op while an operation is in flight, and no-op right after a
+    /// settle: the settled launchd truth outruns the heartbeat by its
+    /// freshness window, and a stale heartbeat must not overwrite it
+    /// (a Start clicked right after Stop would otherwise read as Stop).
     public func adopt(alive: Bool) {
         guard !status.isTransitioning else { return }
+        guard Date().timeIntervalSince(lastSettleDate) >= Self.heartbeatFreshness else {
+            return
+        }
         if alive, status == .stopped {
             status = .running
         }
@@ -60,7 +74,9 @@ public final class DaemonController {
         // Double-click protection: the UI's disabled state propagates
         // asynchronously, so only this synchronous guard can stop a
         // second click from racing its own bootout/bootstrap cycle.
-        guard !status.isTransitioning else { return }
+        guard !status.isTransitioning else {
+            return
+        }
         status = DaemonStatus.next(from: status, event: .operationStarted)
         do {
             try await Task.detached(priority: .userInitiated) {
@@ -73,10 +89,17 @@ public final class DaemonController {
         settle()
     }
 
-    /// Stop: bootout the agent.
+    /// Stop: bootout the agent, then wait until launchd confirms the
+    /// job is gone — bootout tears down asynchronously, and a settle
+    /// right after it could read the half-dead job as still running
+    /// and flip the button back. The wait mirrors bootstrapWithRetry:
+    /// poll per attempt until the state is confirmed or the deadline
+    /// passes, then settle once.
     public func stop() async throws {
         // Same double-click protection as start().
-        guard !status.isTransitioning else { return }
+        guard !status.isTransitioning else {
+            return
+        }
         status = DaemonStatus.next(from: status, event: .operationStarted)
         do {
             try await Task.detached(priority: .userInitiated) {
@@ -88,6 +111,9 @@ public final class DaemonController {
                     throw DaemonControlError.bootoutFailed(exitCode: result.exitCode)
                 }
             }.value
+            try await Task.detached(priority: .userInitiated) {
+                Self.waitUntilStopped(deadline: 7)
+            }.value
         } catch {
             settle()
             throw error
@@ -95,19 +121,39 @@ public final class DaemonController {
         settle()
     }
 
+    /// Polls launchd until the job is gone or the deadline passes —
+    /// stop()'s counterpart of bootstrapWithRetry's trust-per-attempt.
+    nonisolated private static func waitUntilStopped(deadline: TimeInterval) {
+        let deadlineDate = Date().addingTimeInterval(deadline)
+        while Date() < deadlineDate {
+            if !isAgentRunning() { return }
+            Thread.sleep(forTimeInterval: 0.25)
+        }
+    }
+
     /// Overwrites `status` from a fresh launchctl reading (unlike
     /// `refreshStatus`, which refuses during a transition).
     private func settle() {
         let result = Self.runLaunchctl(
             arguments: ["print", "\(Self.domain)/\(Self.label)"])
+        let running = LaunchctlParser.isRunning(output: result.output)
+        lastSettleDate = Date()
         status = DaemonStatus.next(
             from: status,
-            event: .operationSettled(
-                running: LaunchctlParser.isRunning(output: result.output)))
+            event: .operationSettled(running: running))
     }
 
     /// The blocking part of `start()`, safe to run off the main actor.
     nonisolated private static func startBlocking() throws {
+        // Idempotent start: a second click lands while the first
+        // bootstrap just finished — the heartbeat still reads dead, so
+        // the toggle rightfully offers Start again, but the job is
+        // already running. A bootout here would kill the healthy
+        // daemon, and the retry would report a false success on the
+        // dying job.
+        if isAgentRunning() {
+            return
+        }
         try writeLaunchAgentPlist()
 
         _ = runLaunchctl(arguments: ["bootout", "\(domain)/\(label)"])
